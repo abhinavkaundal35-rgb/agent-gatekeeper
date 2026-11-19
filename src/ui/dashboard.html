@@ -227,63 +227,20 @@
       <button class="tab-btn" onclick="switchTab('code')">💻 Client SDK & API Code</button>
     </div>
 
-    <!-- TAB 1: CLIENT STOREFRONT & AGENT DISPATCHER -->
+    <!-- TAB 1: EMBEDDED CLIENT STOREFRONT (AMAZON INDIA) -->
     <div id="tab-client">
-      <div class="grid-2">
-        <div>
-          <div class="card">
-            <h2>
-              <span>1. Amazon India Storefront (Catalog)</span>
-              <span style="font-size: 12px; color: var(--text-muted);">Client AI Agent Selection</span>
-            </h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-              Select items for the AI Shopping Bot to purchase on behalf of customer <strong>Aarav Sharma</strong>:
-            </p>
-            <div class="product-grid" id="catalog-grid">
-              <!-- Rendered via JS -->
-            </div>
-
-            <div class="form-group">
-              <label>Delivery PIN Code (Verified: 560001, 560034, 110001):</label>
-              <input type="text" id="client-pincode" value="560001" placeholder="e.g. 560001">
-            </div>
-
-            <div class="form-group">
-              <label>Acting AI Agent:</label>
-              <select id="client-agent-select">
-                <option value="active">Active: SmartShopperBot (Orders Scope)</option>
-                <option value="revoked">Revoked: UnauthorizedBot (Revoked Status)</option>
-              </select>
-            </div>
-
-            <button class="action-btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px;" onclick="dispatchClientPurchase()">
-              🚀 Dispatch AI Agent Request to Gatekeeper
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div class="card">
-            <h2>
-              <span>2. Client Request & Gatekeeper Response</span>
-              <span id="response-badge"></span>
-            </h2>
-            <div id="client-console" class="console-output">// Select an item on the left and click "Dispatch AI Agent Request" to inspect the JSON wire exchange...</div>
-
-            <!-- Simulated Customer Mobile Notification -->
-            <div id="mobile-push" class="mobile-mockup">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-weight:700; color:var(--amz-orange); font-size:13px;">🔔 Amazon India Customer Alert</span>
-                <span style="font-size:11px; color:#94a3b8;">Just now</span>
-              </div>
-              <p id="mobile-msg" style="font-size:13px; margin-bottom:12px;"></p>
-              <div style="display:flex; gap:8px;">
-                <button class="action-btn btn-approve" style="flex:1;" onclick="handleMobileDecision('APPROVED')">✓ Approve Purchase</button>
-                <button class="action-btn btn-reject" style="flex:1;" onclick="handleMobileDecision('REJECTED')">✕ Reject</button>
-              </div>
+      <div style="background:white; border-radius:12px; border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:24px;">
+        <div style="padding:14px 24px; background:#131921; color:white; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:18px;">🛒</span>
+            <div>
+              <div style="font-weight:700; font-size:15px; color:#febd69;">Live Amazon India Client Storefront</div>
+              <div style="font-size:12px; color:#cbd5e1;">Clients browse 33 products, add to cart, and test live Gatekeeper AI checkout</div>
             </div>
           </div>
+          <a href="/store" target="_blank" style="background:var(--amz-orange); color:#131921; font-weight:700; font-size:12px; padding:6px 14px; border-radius:4px; text-decoration:none;">Open in Separate Tab ↗</a>
         </div>
+        <iframe src="/store" style="width:100%; height:900px; border:none;" title="Amazon India Storefront"></iframe>
       </div>
     </div>
 
