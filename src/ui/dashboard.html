@@ -53,9 +53,10 @@
       margin-bottom: 24px;
       border-bottom: 1px solid var(--border);
       padding-bottom: 8px;
+      overflow-x: auto;
     }
     .tab-btn {
-      padding: 10px 20px;
+      padding: 10px 18px;
       border: none;
       background: none;
       font-size: 14px;
@@ -63,6 +64,7 @@
       color: var(--text-muted);
       cursor: pointer;
       border-radius: 8px;
+      white-space: nowrap;
       transition: all 0.2s;
     }
     .tab-btn.active {
@@ -80,6 +82,7 @@
       border-radius: 12px;
       padding: 24px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
     }
     .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
 
@@ -120,7 +123,7 @@
       font-family: monospace;
       font-size: 12px;
       min-height: 260px;
-      max-height: 400px;
+      max-height: 420px;
       overflow-y: auto;
       white-space: pre-wrap;
     }
@@ -132,7 +135,7 @@
     tr:hover { background: #fdfdfd; }
 
     .action-btn {
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
@@ -142,6 +145,8 @@
     }
     .btn-approve { background: var(--allow); color: white; margin-right: 6px; }
     .btn-reject { background: var(--block); color: white; }
+    .btn-primary { background: var(--amz-orange); color: var(--amz-navy); font-weight: 700; }
+    .btn-primary:hover { background: var(--amz-orange-dark); }
     .action-btn:hover { opacity: 0.9; }
 
     .banner {
@@ -152,6 +157,44 @@
       font-size: 13px;
       color: #0369a1;
       margin-bottom: 20px;
+    }
+
+    /* Client Storefront UI Elements */
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .product-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .product-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .product-price { font-size: 16px; font-weight: 700; color: #b12704; margin-bottom: 10px; }
+    .product-cat { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+
+    /* Mobile Notification Simulation */
+    .mobile-mockup {
+      background: #1e293b;
+      color: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 2px solid var(--amz-orange);
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -170,32 +213,92 @@
 
   <div class="container">
     <div class="banner">
-      <strong>Prototype Active:</strong> Intercepting customer AI agent requests and returning real-time triage verdicts: 
-      <span class="badge badge-allow">ALLOW</span> 
-      <span class="badge badge-ask">ASK CUSTOMER</span> 
-      <span class="badge badge-block">BLOCK</span>
+      <strong>Ecosystem Architecture:</strong> This dashboard demonstrates both sides of the system:
+      <strong>1) Client Side</strong> (AI Shopping Agents & Amazon App Customers), and 
+      <strong>2) Gatekeeper Side</strong> (Security Evaluation, Triage & Immutable Audit).
     </div>
 
     <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('simulator')">Gatekeeper Simulator</button>
-      <button class="tab-btn" onclick="switchTab('approvals')">Customer Approvals Queue</button>
-      <button class="tab-btn" onclick="switchTab('audit')">Audit Logs & Governance</button>
-      <button class="tab-btn" onclick="switchTab('store')">Orders & Catalog</button>
+      <button class="tab-btn active" onclick="switchTab('client')">🛒 Client Storefront & AI Agent</button>
+      <button class="tab-btn" onclick="switchTab('simulator')">🛡️ Gatekeeper Policy Console</button>
+      <button class="tab-btn" onclick="switchTab('approvals')">📱 Customer Approval Queue</button>
+      <button class="tab-btn" onclick="switchTab('audit')">📜 Audit Trail & Governance</button>
+      <button class="tab-btn" onclick="switchTab('code')">💻 Client SDK & API Code</button>
     </div>
 
-    <!-- TAB 1: SIMULATOR -->
-    <div id="tab-simulator">
+    <!-- TAB 1: CLIENT STOREFRONT & AGENT DISPATCHER -->
+    <div id="tab-client">
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2>
+              <span>1. Amazon India Storefront (Catalog)</span>
+              <span style="font-size: 12px; color: var(--text-muted);">Client AI Agent Selection</span>
+            </h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+              Select items for the AI Shopping Bot to purchase on behalf of customer <strong>Aarav Sharma</strong>:
+            </p>
+            <div class="product-grid" id="catalog-grid">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="form-group">
+              <label>Delivery PIN Code (Verified: 560001, 560034, 110001):</label>
+              <input type="text" id="client-pincode" value="560001" placeholder="e.g. 560001">
+            </div>
+
+            <div class="form-group">
+              <label>Acting AI Agent:</label>
+              <select id="client-agent-select">
+                <option value="active">Active: SmartShopperBot (Orders Scope)</option>
+                <option value="revoked">Revoked: UnauthorizedBot (Revoked Status)</option>
+              </select>
+            </div>
+
+            <button class="action-btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px;" onclick="dispatchClientPurchase()">
+              🚀 Dispatch AI Agent Request to Gatekeeper
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h2>
+              <span>2. Client Request & Gatekeeper Response</span>
+              <span id="response-badge"></span>
+            </h2>
+            <div id="client-console" class="console-output">// Select an item on the left and click "Dispatch AI Agent Request" to inspect the JSON wire exchange...</div>
+
+            <!-- Simulated Customer Mobile Notification -->
+            <div id="mobile-push" class="mobile-mockup">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:700; color:var(--amz-orange); font-size:13px;">🔔 Amazon India Customer Alert</span>
+                <span style="font-size:11px; color:#94a3b8;">Just now</span>
+              </div>
+              <p id="mobile-msg" style="font-size:13px; margin-bottom:12px;"></p>
+              <div style="display:flex; gap:8px;">
+                <button class="action-btn btn-approve" style="flex:1;" onclick="handleMobileDecision('APPROVED')">✓ Approve Purchase</button>
+                <button class="action-btn btn-reject" style="flex:1;" onclick="handleMobileDecision('REJECTED')">✕ Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: GATEKEEPER SIMULATOR CONSOLE -->
+    <div id="tab-simulator" style="display: none;">
       <div class="grid-2">
         <div class="card">
           <h2>
-            <span>Simulate AI Agent Requests</span>
-            <span style="font-size: 12px; color: var(--text-muted);">Click to trigger</span>
+            <span>Pre-Configured Test Scenarios</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Quick Academic Demo</span>
           </h2>
           <div class="scenario-btn-group">
             <button class="scenario-btn" onclick="runScenario('allow_routine')">
               <div>
                 <div class="scenario-title">1. Routine Grocery Purchase (< ₹2,000)</div>
-                <div class="scenario-desc">Tea & Atta for ₹1,015 to saved Bengaluru PIN 560001</div>
+                <div class="scenario-desc">Tata Tea & Atta for ₹1,015 to Bengaluru PIN 560001</div>
               </div>
               <span class="badge badge-allow">ALLOW</span>
             </button>
@@ -211,7 +314,7 @@
             <button class="scenario-btn" onclick="runScenario('ask_new_address')">
               <div>
                 <div class="scenario-title">3. Unverified Shipping Address</div>
-                <div class="scenario-desc">Shirt for ₹899 sent to unverified Mumbai PIN 400001</div>
+                <div class="scenario-desc">Casual Shirt for ₹899 sent to unverified Mumbai PIN 400001</div>
               </div>
               <span class="badge badge-ask">ASK CUSTOMER</span>
             </button>
@@ -243,18 +346,18 @@
         </div>
 
         <div class="card">
-          <h2>Gatekeeper Interceptor Response</h2>
-          <div id="console-output" class="console-output">// Gatekeeper output will appear here after clicking a scenario...</div>
+          <h2>Gatekeeper Policy Response</h2>
+          <div id="console-output" class="console-output">// Gatekeeper output will appear here...</div>
         </div>
       </div>
     </div>
 
-    <!-- TAB 2: APPROVALS -->
+    <!-- TAB 3: APPROVALS -->
     <div id="tab-approvals" style="display: none;">
       <div class="card">
         <h2>
           <span>Customer Approval Queue (Human-in-the-Loop)</span>
-          <button class="action-btn" style="background:#0284c7; color:white;" onclick="loadApprovals()">Refresh</button>
+          <button class="action-btn" style="background:#0284c7; color:white;" onclick="loadApprovals()">Refresh Queue</button>
         </h2>
         <div class="table-container">
           <table id="approvals-table">
@@ -275,7 +378,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: AUDIT -->
+    <!-- TAB 4: AUDIT -->
     <div id="tab-audit" style="display: none;">
       <div class="card">
         <h2>
@@ -302,27 +405,45 @@
       </div>
     </div>
 
-    <!-- TAB 4: STORE & ORDERS -->
-    <div id="tab-store" style="display: none;">
+    <!-- TAB 5: CLIENT CODE & SDK -->
+    <div id="tab-code" style="display: none;">
       <div class="card">
-        <h2>Placed Amazon India Orders</h2>
-        <div class="table-container">
-          <table id="orders-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Amount (INR)</th>
-                <th>Status</th>
-                <th>Shipping PIN</th>
-                <th>Items Count</th>
-                <th>Placed At</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Loading orders...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <h2>How External Client AI Agents Call Gatekeeper</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          External AI Agents (written in Python, Node.js, LangChain, or cURL) call the Gatekeeper Interceptor API:
+        </p>
+
+        <h3 style="font-size:14px; margin-bottom:8px;">1. Python (Requests / HTTPX)</h3>
+        <pre class="console-output" style="max-height:220px;">
+import requests
+
+url = "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate"
+payload = {
+    "agent_id": "agent-amz-001",
+    "api_token": "amz_gatekeeper_token_...",
+    "customer_id": "cust-amz-001",
+    "action_type": "PURCHASE_ORDER",
+    "payload": {
+        "items": [{"item_id": "AMZ-ELEC-01", "name": "Echo Dot", "category": "Electronics", "unit_price_inr": 4499.0, "quantity": 1}],
+        "shipping_address": {"address_line": "MG Road", "city": "Bengaluru", "state": "Karnataka", "pincode": "560001"}
+    }
+}
+
+response = requests.post(url, json=payload).json()
+print("Decision:", response["decision"]) # Returns 'ALLOW', 'ASK CUSTOMER', or 'BLOCK'
+        </pre>
+
+        <h3 style="font-size:14px; margin: 16px 0 8px 0;">2. cURL</h3>
+        <pre class="console-output" style="max-height:160px;">
+curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "agent_id": "agent-amz-001",
+       "action_type": "PURCHASE_ORDER",
+       "customer_id": "cust-amz-001",
+       "payload": {"items": [{"item_id": "AMZ-GROC-01", "name": "Tata Tea", "category": "Grocery", "unit_price_inr": 520.0, "quantity": 1}], "shipping_address": {"pincode": "560001", "city": "Bengaluru", "state": "Karnataka", "address_line": "MG Road"}}
+     }'
+        </pre>
       </div>
     </div>
 
@@ -331,15 +452,45 @@
   <script>
     let activeAgentId = null;
     let activeToken = null;
+    let currentPendingApprovalId = null;
 
-    // Auto-register agent on page load
+    const catalog = [
+      { id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", price: 520.0 },
+      { id: "AMZ-ELEC-02", name: "boAt Rockerz 450", category: "Electronics", price: 1499.0 },
+      { id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", price: 4499.0 },
+      { id: "AMZ-JEWL-01", name: "Kalyan Jewellers Pendant", category: "Jewelry", price: 18500.0 }
+    ];
+
+    let selectedProduct = catalog[0];
+
+    function renderCatalog() {
+      const grid = document.getElementById('catalog-grid');
+      grid.innerHTML = catalog.map((p, idx) => `
+        <div class="product-card" style="${p.id === selectedProduct.id ? 'border-color:var(--amz-orange); background:#fffcf8;' : ''}" onclick="selectProduct(${idx})">
+          <div>
+            <div class="product-cat">${p.category}</div>
+            <div class="product-name">${p.name}</div>
+          </div>
+          <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+          <button class="action-btn" style="background:${p.id === selectedProduct.id ? 'var(--amz-orange)' : '#f1f5f9'}; width:100%;">
+            ${p.id === selectedProduct.id ? 'Selected' : 'Select'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function selectProduct(idx) {
+      selectedProduct = catalog[idx];
+      renderCatalog();
+    }
+
     async function initAgent() {
       try {
         const res = await fetch('/api/v1/agents/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: 'WebUIAssistantBot',
+            name: 'SmartShopperBot',
             customer_id: 'cust-amz-001',
             scopes: ['orders:view', 'orders:buy', 'returns:create']
           })
@@ -350,6 +501,95 @@
       } catch (err) {
         console.error("Init error:", err);
       }
+    }
+
+    async function dispatchClientPurchase() {
+      if (!activeAgentId) await initAgent();
+      const consoleEl = document.getElementById('client-console');
+      const badgeEl = document.getElementById('response-badge');
+      const mobilePush = document.getElementById('mobile-push');
+      mobilePush.style.display = 'none';
+
+      consoleEl.textContent = "Client AI Agent dispatching request to Gatekeeper...";
+
+      const pincode = document.getElementById('client-pincode').value.trim() || "560001";
+      const agentType = document.getElementById('client-agent-select').value;
+
+      let agentIdToSend = activeAgentId;
+      let tokenToSend = activeToken;
+
+      if (agentType === 'revoked') {
+        // Create revoked agent on the fly
+        const regRes = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'UnauthorizedBot', customer_id: 'cust-amz-001', scopes: ['orders:buy'] })
+        });
+        const regData = await regRes.json();
+        await fetch(`/api/v1/agents/${regData.agent_id}/revoke`, { method: 'POST' });
+        agentIdToSend = regData.agent_id;
+        tokenToSend = regData.api_token;
+      }
+
+      const clientReq = {
+        agent_id: agentIdToSend,
+        api_token: tokenToSend,
+        customer_id: "cust-amz-001",
+        action_type: "PURCHASE_ORDER",
+        payload: {
+          items: [
+            {
+              item_id: selectedProduct.id,
+              name: selectedProduct.name,
+              category: selectedProduct.category,
+              unit_price_inr: selectedProduct.price,
+              quantity: 1
+            }
+          ],
+          shipping_address: {
+            address_line: "Flat 402, Green Palms",
+            city: pincode === "400001" ? "Mumbai" : "Bengaluru",
+            state: pincode === "400001" ? "Maharashtra" : "Karnataka",
+            pincode: pincode
+          }
+        }
+      };
+
+      try {
+        const res = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clientReq)
+        });
+        const data = await res.json();
+        consoleEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update badge
+        if (data.decision === 'ALLOW') {
+          badgeEl.innerHTML = '<span class="badge badge-allow">VERDICT: ALLOW</span>';
+        } else if (data.decision === 'ASK CUSTOMER') {
+          badgeEl.innerHTML = '<span class="badge badge-ask">VERDICT: ASK CUSTOMER</span>';
+          // Trigger mobile simulation popup
+          currentPendingApprovalId = data.approval_id;
+          document.getElementById('mobile-msg').textContent = data.reason;
+          mobilePush.style.display = 'block';
+        } else if (data.decision === 'BLOCK') {
+          badgeEl.innerHTML = '<span class="badge badge-block">VERDICT: BLOCK</span>';
+        }
+      } catch (err) {
+        consoleEl.textContent = "Error: " + err.message;
+      }
+    }
+
+    async function handleMobileDecision(decision) {
+      if (!currentPendingApprovalId) return;
+      await fetch(`/api/v1/approvals/${currentPendingApprovalId}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: decision })
+      });
+      document.getElementById('mobile-push').style.display = 'none';
+      document.getElementById('client-console').textContent += `\n\n[MOBILE APP ALERT]: Customer selected ${decision} on Amazon App. Transaction updated!`;
     }
 
     async function runScenario(type) {
@@ -395,7 +635,6 @@
           }
         };
       } else if (type === 'block_revoked') {
-        // Create and immediately revoke an agent
         const regRes = await fetch('/api/v1/agents/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -458,14 +697,14 @@
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
+      document.getElementById('tab-client').style.display = tab === 'client' ? 'block' : 'none';
       document.getElementById('tab-simulator').style.display = tab === 'simulator' ? 'block' : 'none';
       document.getElementById('tab-approvals').style.display = tab === 'approvals' ? 'block' : 'none';
       document.getElementById('tab-audit').style.display = tab === 'audit' ? 'block' : 'none';
-      document.getElementById('tab-store').style.display = tab === 'store' ? 'block' : 'none';
+      document.getElementById('tab-code').style.display = tab === 'code' ? 'block' : 'none';
 
       if (tab === 'approvals') loadApprovals();
       if (tab === 'audit') loadAuditLogs();
-      if (tab === 'store') loadOrders();
     }
 
     async function loadApprovals() {
@@ -521,28 +760,9 @@
       `).join('');
     }
 
-    async function loadOrders() {
-      const res = await fetch('/api/v1/store/orders');
-      const orders = await res.json();
-      const tbody = document.querySelector('#orders-table tbody');
-      if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No placed orders yet.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = orders.map(o => `
-        <tr>
-          <td><code>${o.order_id}</code></td>
-          <td><strong>₹${o.total_amount.toLocaleString('en-IN')}</strong></td>
-          <td><span class="badge badge-allow">${o.status}</span></td>
-          <td>${o.shipping_address.pincode}</td>
-          <td>${o.items.length} items</td>
-          <td><small>${o.placed_at.replace('T', ' ').substring(0, 19)}</small></td>
-        </tr>
-      `).join('');
-    }
-
     // Initialize on load
     initAgent();
+    renderCatalog();
   </script>
 </body>
 </html>
