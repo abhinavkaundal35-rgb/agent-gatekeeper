@@ -14,15 +14,54 @@ from src.store.models import (
     ProductCategory
 )
 
-# Reference sample catalog for Amazon India
+# Reference sample catalog for Amazon India (33 products across categories)
 SAMPLE_CATALOG = [
+    # Electronics
     CartItem(item_id="AMZ-ELEC-01", name="Echo Dot (5th Gen) Smart Speaker", category=ProductCategory.ELECTRONICS, unit_price_inr=4499.0, quantity=1),
     CartItem(item_id="AMZ-ELEC-02", name="boAt Rockerz 450 Bluetooth Headphones", category=ProductCategory.ELECTRONICS, unit_price_inr=1499.0, quantity=1),
+    CartItem(item_id="AMZ-ELEC-03", name="Kindle Paperwhite (16 GB) 6.8 Display", category=ProductCategory.ELECTRONICS, unit_price_inr=13999.0, quantity=1),
+    CartItem(item_id="AMZ-ELEC-04", name="OnePlus Nord Buds 2 TWS Earbuds", category=ProductCategory.ELECTRONICS, unit_price_inr=2299.0, quantity=1),
+    CartItem(item_id="AMZ-ELEC-05", name="Mi 10000mAh Power Bank 3i (18W)", category=ProductCategory.ELECTRONICS, unit_price_inr=1299.0, quantity=1),
+    CartItem(item_id="AMZ-ELEC-06", name="Logitech K380 Wireless Keyboard", category=ProductCategory.ELECTRONICS, unit_price_inr=2995.0, quantity=1),
+    CartItem(item_id="AMZ-ELEC-07", name="Fire TV Stick 4K with Alexa Voice Remote", category=ProductCategory.ELECTRONICS, unit_price_inr=5999.0, quantity=1),
+
+    # Grocery / Fresh (Non-returnable policy)
     CartItem(item_id="AMZ-GROC-01", name="Tata Tea Gold 1kg", category=ProductCategory.GROCERY, unit_price_inr=520.0, quantity=1),
     CartItem(item_id="AMZ-GROC-02", name="Aashirvaad Superior MP Atta 10kg", category=ProductCategory.GROCERY, unit_price_inr=495.0, quantity=1),
-    CartItem(item_id="AMZ-JEWL-01", name="Candere by Kalyan Jewellers Gold Pendant", category=ProductCategory.JEWELRY, unit_price_inr=18500.0, quantity=1),
-    CartItem(item_id="AMZ-FASH-01", name="Cotton Casual Shirt for Men", category=ProductCategory.FASHION, unit_price_inr=899.0, quantity=1),
+    CartItem(item_id="AMZ-GROC-03", name="Daawat Rozana Super Basmati Rice 5kg", category=ProductCategory.GROCERY, unit_price_inr=449.0, quantity=1),
+    CartItem(item_id="AMZ-GROC-04", name="Amul Pure Cow Ghee 1L Tin", category=ProductCategory.GROCERY, unit_price_inr=650.0, quantity=1),
+    CartItem(item_id="AMZ-GROC-05", name="Borges Extra Virgin Olive Oil 1L", category=ProductCategory.GROCERY, unit_price_inr=1299.0, quantity=1),
+    CartItem(item_id="AMZ-GROC-06", name="Nutraj California Almonds 500g", category=ProductCategory.GROCERY, unit_price_inr=480.0, quantity=1),
+    CartItem(item_id="AMZ-GROC-07", name="Nescafe Classic Instant Coffee 200g Jar", category=ProductCategory.GROCERY, unit_price_inr=410.0, quantity=1),
+
+    # Fashion & Apparel
+    CartItem(item_id="AMZ-FASH-01", name="Cotton Casual Regular Fit Shirt for Men", category=ProductCategory.FASHION, unit_price_inr=899.0, quantity=1),
+    CartItem(item_id="AMZ-FASH-02", name="Levi's Men's 511 Slim Fit Jeans", category=ProductCategory.FASHION, unit_price_inr=2499.0, quantity=1),
+    CartItem(item_id="AMZ-FASH-03", name="Sparx Men's Walking & Running Shoes", category=ProductCategory.FASHION, unit_price_inr=999.0, quantity=1),
+    CartItem(item_id="AMZ-FASH-04", name="Biba Women's Cotton Straight Kurta", category=ProductCategory.FASHION, unit_price_inr=1199.0, quantity=1),
+    CartItem(item_id="AMZ-FASH-05", name="Fastrack Aviator Sunglasses", category=ProductCategory.FASHION, unit_price_inr=1599.0, quantity=1),
+    CartItem(item_id="AMZ-FASH-06", name="WildHorn Genuine Leather Men's Wallet", category=ProductCategory.FASHION, unit_price_inr=599.0, quantity=1),
+
+    # Home & Kitchen
     CartItem(item_id="AMZ-HOME-01", name="Prestige Iris 750 Watt Mixer Grinder", category=ProductCategory.HOME, unit_price_inr=3199.0, quantity=1),
+    CartItem(item_id="AMZ-HOME-02", name="Milton Thermosteel 1000ml Flask", category=ProductCategory.HOME, unit_price_inr=899.0, quantity=1),
+    CartItem(item_id="AMZ-HOME-03", name="Hawkins Contura 3L Pressure Cooker", category=ProductCategory.HOME, unit_price_inr=1650.0, quantity=1),
+    CartItem(item_id="AMZ-HOME-04", name="Solimo Cotton Double Bedsheet", category=ProductCategory.HOME, unit_price_inr=799.0, quantity=1),
+    CartItem(item_id="AMZ-HOME-05", name="Philips Digital Air Fryer (4.1 L)", category=ProductCategory.HOME, unit_price_inr=7999.0, quantity=1),
+
+    # Jewelry & Luxury (Includes hard cap trigger)
+    CartItem(item_id="AMZ-JEWL-01", name="Candere by Kalyan Jewellers 22K Gold Pendant", category=ProductCategory.JEWELRY, unit_price_inr=18500.0, quantity=1),
+    CartItem(item_id="AMZ-JEWL-02", name="Clara 925 Sterling Silver Solitaire Ring", category=ProductCategory.JEWELRY, unit_price_inr=1899.0, quantity=1),
+    CartItem(item_id="AMZ-JEWL-03", name="Titan Karishma Analog Men's Watch", category=ProductCategory.JEWELRY, unit_price_inr=2195.0, quantity=1),
+
+    # Books & Stationery
+    CartItem(item_id="AMZ-BOOK-01", name="Atomic Habits by James Clear", category=ProductCategory.BOOKS, unit_price_inr=499.0, quantity=1),
+    CartItem(item_id="AMZ-BOOK-02", name="Fluent Python Programming Guide", category=ProductCategory.BOOKS, unit_price_inr=1850.0, quantity=1),
+    CartItem(item_id="AMZ-BOOK-03", name="Classmate Spiral Notebook (Pack of 6)", category=ProductCategory.BOOKS, unit_price_inr=420.0, quantity=1),
+
+    # Beauty & Personal Care
+    CartItem(item_id="AMZ-BEAU-01", name="Cetaphil Gentle Skin Cleanser (250ml)", category=ProductCategory.BEAUTY, unit_price_inr=545.0, quantity=1),
+    CartItem(item_id="AMZ-BEAU-02", name="Oral-B Pro 3 Electric Rechargeable Toothbrush", category=ProductCategory.BEAUTY, unit_price_inr=3499.0, quantity=1),
 ]
 
 class StoreService:

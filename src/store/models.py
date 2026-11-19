@@ -12,6 +12,8 @@ class ProductCategory(str, Enum):
     HOME = "Home"
     GIFT_CARDS = "Gift Cards"
     PERSONAL_HYGIENE = "Personal Hygiene"
+    BOOKS = "Books"
+    BEAUTY = "Beauty"
 
 class OrderStatus(str, Enum):
     PLACED = "PLACED"
