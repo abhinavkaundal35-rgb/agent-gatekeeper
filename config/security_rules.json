@@ -1,0 +1,115 @@
+{
+  "system": "Agent Gatekeeper Security Rules",
+  "version": "1.0.0",
+  "reference_entity": "Amazon India",
+  "currency": "INR",
+  "thresholds": {
+    "auto_approval_max_inr": 2000.0,
+    "transaction_hard_cap_inr": 15000.0,
+    "daily_spend_hard_cap_inr": 25000.0,
+    "return_window_days": 7,
+    "refund_auto_approval_max_inr": 1000.0
+  },
+  "restricted_categories": [
+    "Jewelry",
+    "Gift Cards",
+    "Digital Goods"
+  ],
+  "non_returnable_categories": [
+    "Grocery",
+    "Personal Hygiene",
+    "Innerwear"
+  ],
+  "rules": [
+    {
+      "rule_id": "SEC-R01",
+      "name": "Revoked Agent Intercept",
+      "action_type": "ALL",
+      "condition": "agent.is_revoked == True",
+      "verdict": "BLOCK",
+      "priority": 10,
+      "message": "Access denied: Agent is revoked or decommissioned."
+    },
+    {
+      "rule_id": "SEC-R02",
+      "name": "Unauthorized Scope Intercept",
+      "action_type": "ALL",
+      "condition": "requested_scope not in agent.scopes",
+      "verdict": "BLOCK",
+      "priority": 20,
+      "message": "Access denied: Agent lacks permission scope for this action."
+    },
+    {
+      "rule_id": "SEC-R03",
+      "name": "Transaction Hard Cap Exceeded",
+      "action_type": "PURCHASE_ORDER",
+      "condition": "transaction_amount > thresholds.transaction_hard_cap_inr",
+      "verdict": "BLOCK",
+      "priority": 30,
+      "message": "Transaction blocked: Order amount exceeds hard maximum threshold of ₹15,000."
+    },
+    {
+      "rule_id": "SEC-R04",
+      "name": "Daily Spending Limit Hard Cap",
+      "action_type": "PURCHASE_ORDER",
+      "condition": "daily_spend_cumulative > thresholds.daily_spend_hard_cap_inr",
+      "verdict": "BLOCK",
+      "priority": 35,
+      "message": "Transaction blocked: Cumulative 24-hour spend exceeds maximum limit of ₹25,000."
+    },
+    {
+      "rule_id": "SEC-R05",
+      "name": "Non-Returnable Category Check",
+      "action_type": "RETURN_REQUEST",
+      "condition": "item.category in non_returnable_categories",
+      "verdict": "BLOCK",
+      "priority": 40,
+      "message": "Return blocked: Category is non-returnable under Amazon India policy."
+    },
+    {
+      "rule_id": "SEC-R06",
+      "name": "Return Window Expired",
+      "action_type": "RETURN_REQUEST",
+      "condition": "days_since_delivery > thresholds.return_window_days",
+      "verdict": "BLOCK",
+      "priority": 45,
+      "message": "Return blocked: Exceeded standard Amazon India 7-day return window."
+    },
+    {
+      "rule_id": "SEC-R07",
+      "name": "High Value Purchase Step-Up Approval",
+      "action_type": "PURCHASE_ORDER",
+      "condition": "transaction_amount > thresholds.auto_approval_max_inr",
+      "verdict": "ASK CUSTOMER",
+      "priority": 50,
+      "message": "Customer approval required: Order amount exceeds automatic threshold of ₹2,000."
+    },
+    {
+      "rule_id": "SEC-R08",
+      "name": "Unverified Shipping Address",
+      "action_type": "PURCHASE_ORDER",
+      "condition": "shipping_pincode not in customer.verified_pincodes",
+      "verdict": "ASK CUSTOMER",
+      "priority": 55,
+      "message": "Customer approval required: Delivery PIN code is not in saved verified addresses."
+    },
+    {
+      "rule_id": "SEC-R09",
+      "name": "High Risk Category Step-Up",
+      "action_type": "PURCHASE_ORDER",
+      "condition": "item.category in restricted_categories",
+      "verdict": "ASK CUSTOMER",
+      "priority": 60,
+      "message": "Customer approval required: Cart contains high-risk or restricted product category."
+    },
+    {
+      "rule_id": "SEC-R10",
+      "name": "High Value Refund Approval",
+      "action_type": "RETURN_REQUEST",
+      "condition": "refund_amount > thresholds.refund_auto_approval_max_inr",
+      "verdict": "ASK CUSTOMER",
+      "priority": 65,
+      "message": "Customer approval required: Refund amount exceeds automatic threshold of ₹1,000."
+    }
+  ]
+}
