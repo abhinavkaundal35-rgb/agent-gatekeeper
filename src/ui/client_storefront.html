@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon India | Online Shopping Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --amz-black: #131921;
+      --amz-dark: #232f3e;
+      --amz-yellow: #febd69;
+      --amz-orange: #f08804;
+      --amz-orange-dark: #e88b00;
+      --amz-blue: #007185;
+      --amz-red: #b12704;
+      --bg: #eaeded;
+      --card-bg: #ffffff;
+      --text: #0f1111;
+      --text-muted: #565959;
+      --border: #d5d9d9;
+      --allow: #067d62;
+      --allow-bg: #e6f4ea;
+      --ask: #b86200;
+      --ask-bg: #fff8e1;
+      --block: #ba0933;
+      --block-bg: #fdf2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
+
+    /* Amazon Top Navigation Bar */
+    .top-nav {
+      background-color: var(--amz-black);
+      color: white;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: white;
+    }
+    .brand-logo .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-logo .in-tag { color: var(--amz-orange); font-size: 13px; font-weight: 700; margin-top: -6px; }
+
+    .deliver-location {
+      font-size: 12px;
+      line-height: 1.3;
+      cursor: pointer;
+    }
+    .deliver-location .small { color: #ccc; }
+    .deliver-location .bold { font-weight: 700; color: white; }
+
+    .search-bar {
+      flex: 1;
+      max-width: 600px;
+      display: flex;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-bar button {
+      background: var(--amz-yellow);
+      border: none;
+      padding: 0 18px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .search-bar button:hover { background: var(--amz-orange); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-btn {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+    }
+    .cart-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #232f3e;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .cart-count {
+      background: var(--amz-orange);
+      color: var(--amz-black);
+      font-weight: 800;
+      border-radius: 12px;
+      padding: 1px 7px;
+      font-size: 12px;
+    }
+
+    /* Sub-header */
+    .sub-nav {
+      background-color: var(--amz-dark);
+      color: white;
+      padding: 8px 24px;
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .sub-nav a { color: white; text-decoration: none; }
+    .sub-nav a:hover { color: var(--amz-orange); }
+
+    .container { max-width: 1280px; margin: 20px auto; padding: 0 20px; }
+
+    /* Gateway Connection Banner */
+    .gatekeeper-status-bar {
+      background: #1e293b;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .pulse-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    /* Layout */
+    .store-grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 992px) { .store-grid { grid-template-columns: 1fr; } }
+
+    /* Products Section */
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .product-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .badge-category {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .product-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      color: #0f1111;
+    }
+    .product-rating {
+      color: var(--amz-orange);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .product-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--amz-red);
+      margin-bottom: 14px;
+    }
+    .product-policy {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .btn-add-cart {
+      background: #ffd814;
+      border: 1px solid #fcd200;
+      border-radius: 20px;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .btn-add-cart:hover { background: #f7ca00; }
+
+    /* Shopping Cart Sidebar */
+    .cart-sidebar {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    .cart-sidebar h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-items-list {
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .cart-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 13px;
+    }
+    .cart-item-row .name { font-weight: 600; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-row .price { color: var(--amz-red); font-weight: 700; }
+    .btn-remove {
+      color: var(--amz-blue);
+      cursor: pointer;
+      font-size: 11px;
+      border: none;
+      background: none;
+      text-decoration: underline;
+    }
+
+    .cart-summary {
+      font-size: 15px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+    }
+    .cart-summary .total { color: var(--amz-red); font-size: 20px; }
+
+    .form-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block; }
+    .form-control {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .btn-checkout {
+      width: 100%;
+      background: var(--amz-orange);
+      border: 1px solid var(--amz-orange-dark);
+      color: var(--amz-black);
+      border-radius: 20px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(213,217,217,.5);
+    }
+    .btn-checkout:hover { background: var(--amz-orange-dark); }
+    .btn-checkout:disabled { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; cursor: not-allowed; }
+
+    /* Gatekeeper Live Triage Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 12px;
+      max-width: 540px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      animation: modalFade 0.25s ease-out;
+    }
+    @keyframes modalFade { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .modal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .modal-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+
+    .verdict-allow { background: var(--allow-bg); color: var(--allow); border: 1px solid var(--allow); }
+    .verdict-ask { background: var(--ask-bg); color: var(--ask); border: 1px solid var(--ask); }
+    .verdict-block { background: var(--block-bg); color: var(--block); border: 1px solid var(--block); }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Amazon Navigation Header -->
+  <header class="top-nav">
+    <a href="/store" class="brand-logo">
+      <span class="logo-text">amazon</span>
+      <span class="in-tag">.in</span>
+    </a>
+
+    <div class="deliver-location">
+      <div class="small">Delivering to Bengaluru 560001</div>
+      <div class="bold">Aarav Sharma - Primary Address</div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search Amazon.in for products, electronics, groceries...">
+      <button>🔍</button>
+    </div>
+
+    <div class="nav-actions">
+      <a href="/" target="_blank" class="nav-btn">
+        <span style="font-size:11px; color:#febd69;">Gatekeeper Portal</span>
+        <span style="font-weight:700;">Admin Dashboard</span>
+      </a>
+      <div class="cart-link" onclick="scrollToCart()">
+        <span>🛒</span>
+        <span class="cart-count" id="cart-counter">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sub Navigation Bar -->
+  <div class="sub-nav">
+    <span>☰ All</span>
+    <a href="#electronics">Electronics</a>
+    <a href="#grocery">Amazon Fresh / Grocery</a>
+    <a href="#fashion">Fashion</a>
+    <a href="#jewelry">Jewelry</a>
+    <a href="/docs" target="_blank" style="margin-left:auto; color:#febd69;">Gatekeeper API Docs (/docs)</a>
+  </div>
+
+  <div class="container">
+
+    <!-- Active Gatekeeper Pipeline Banner -->
+    <div class="gatekeeper-status-bar">
+      <div>
+        <span class="pulse-dot"></span>
+        <strong>Agent Gatekeeper Interceptor Active:</strong> All customer agent checkout requests are evaluated in real time (Rules: <span style="color:#86efac;">ALLOW &le; ₹2,000</span> | <span style="color:#fdba74;">ASK CUSTOMER &gt; ₹2,000</span> | <span style="color:#fca5a5;">BLOCK &gt; ₹15,000</span>).
+      </div>
+      <div>
+        <a href="/" target="_blank" style="color:var(--amz-yellow); font-size:13px; text-decoration:none; font-weight:600;">Open Security Portal ↗</a>
+      </div>
+    </div>
+
+    <div class="store-grid">
+      
+      <!-- Catalog Section -->
+      <div>
+        <h1 style="font-size:22px; font-weight:700; margin-bottom:16px;">Featured Products for Your AI Shopping Agent</h1>
+        <div class="products-container" id="products-grid">
+          <!-- Dynamically Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Live Cart & AI Agent Checkout Sidebar -->
+      <div>
+        <div class="cart-sidebar" id="cart-sidebar">
+          <h2>
+            <span>Agent Shopping Cart</span>
+            <span class="cart-count" id="cart-counter-sidebar">0</span>
+          </h2>
+
+          <div class="cart-items-list" id="cart-items-list">
+            <div style="text-align:center; color:var(--text-muted); padding:30px 0; font-size:13px;">
+              Your cart is empty.<br>Add items to test AI checkout!
+            </div>
+          </div>
+
+          <div class="cart-summary">
+            <span>Subtotal:</span>
+            <span class="total" id="cart-subtotal">₹0.00</span>
+          </div>
+
+          <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border);">
+            <label class="form-label">Delivery PIN Code:</label>
+            <input type="text" id="order-pincode" class="form-control" value="560001" placeholder="Verified PIN: 560001">
+            <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:-8px; margin-bottom:12px;">
+              (Change to <strong>400001</strong> to trigger address mismatch check)
+            </small>
+
+            <label class="form-label">Acting AI Agent:</label>
+            <select id="agent-selector" class="form-control">
+              <option value="active">Active: SmartShopperBot (Authorized)</option>
+              <option value="revoked">Revoked: UnauthorizedBot (Revoked)</option>
+            </select>
+
+            <button id="btn-submit-order" class="btn-checkout" onclick="submitAgentOrder()" disabled>
+              Proceed to Buy (via AI Agent)
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Live Gatekeeper Decision Modal -->
+  <div class="modal-backdrop" id="decision-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon" id="modal-icon-badge">✓</div>
+        <div>
+          <div class="modal-title" id="modal-title-text">Gatekeeper Decision</div>
+          <div style="font-size:12px; color:var(--text-muted);" id="modal-subtitle">Evaluating transaction...</div>
+        </div>
+      </div>
+
+      <div class="modal-body" id="modal-content-body">
+        <!-- Content inserted dynamically -->
+      </div>
+
+      <div class="modal-actions" id="modal-actions-container">
+        <button class="btn-checkout" style="width:auto; padding:8px 20px;" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Amazon India Catalog Products
+    const products = [
+      {
+        id: "AMZ-GROC-01",
+        name: "Tata Tea Gold 1kg",
+        category: "Grocery",
+        price: 520.0,
+        rating: "★★★★☆ (12,481)",
+        policy: "Non-returnable (Perishable Grocery)"
+      },
+      {
+        id: "AMZ-GROC-02",
+        name: "Aashirvaad Superior MP Atta 10kg",
+        category: "Grocery",
+        price: 495.0,
+        rating: "★★★★★ (8,920)",
+        policy: "Non-returnable (Perishable Grocery)"
+      },
+      {
+        id: "AMZ-FASH-01",
+        name: "Cotton Casual Shirt for Men",
+        category: "Fashion",
+        price: 899.0,
+        rating: "★★★★☆ (3,120)",
+        policy: "7 Days Return / Exchange eligible"
+      },
+      {
+        id: "AMZ-ELEC-02",
+        name: "boAt Rockerz 450 Bluetooth Headphones",
+        category: "Electronics",
+        price: 1499.0,
+        rating: "★★★★☆ (65,490)",
+        policy: "7 Days Replacement guarantee"
+      },
+      {
+        id: "AMZ-ELEC-01",
+        name: "Echo Dot (5th Gen) Smart Speaker with Alexa",
+        category: "Electronics",
+        price: 4499.0,
+        rating: "★★★★★ (41,200)",
+        policy: "Exceeds ₹2,000 threshold (Requires Approval)"
+      },
+      {
+        id: "AMZ-HOME-01",
+        name: "Prestige Iris 750W Mixer Grinder (3 Jars)",
+        category: "Home",
+        price: 3199.0,
+        rating: "★★★★☆ (19,840)",
+        policy: "Exceeds ₹2,000 threshold (Requires Approval)"
+      },
+      {
+        id: "AMZ-JEWL-01",
+        name: "Candere by Kalyan Jewellers 22K Gold Pendant",
+        category: "Jewelry",
+        price: 18500.0,
+        rating: "★★★★★ (840)",
+        policy: "Exceeds ₹15,000 Hard Limit (Blocked)"
+      }
+    ];
+
+    let cart = [];
+    let activeAgent = null;
+    let currentPendingApprovalId = null;
+
+    // Initialize registered agent
+    async function initAgent() {
+      try {
+        const res = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'AmazonSmartShopperBot',
+            customer_id: 'cust-amz-001',
+            scopes: ['orders:view', 'orders:buy', 'returns:create']
+          })
+        });
+        activeAgent = await res.json();
+      } catch (err) {
+        console.error("Agent init failed:", err);
+      }
+    }
+
+    // Render product cards
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = products.map((p, idx) => `
+        <div class="product-card">
+          <div>
+            <div class="badge-category">${p.category}</div>
+            <div class="product-title">${p.name}</div>
+            <div class="product-rating">${p.rating}</div>
+            <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+            <div class="product-policy">${p.policy}</div>
+          </div>
+          <button class="btn-add-cart" onclick="addToCart(${idx})">Add to Cart</button>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(idx) {
+      const item = products[idx];
+      cart.push({ ...item, cartId: Date.now() + Math.random() });
+      updateCartUI();
+    }
+
+    function removeFromCart(cartId) {
+      cart = cart.filter(it => it.cartId !== cartId);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const listEl = document.getElementById('cart-items-list');
+      const counterEl = document.getElementById('cart-counter');
+      const counterSidebarEl = document.getElementById('cart-counter-sidebar');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const btnCheckout = document.getElementById('btn-submit-order');
+
+      counterEl.textContent = cart.length;
+      counterSidebarEl.textContent = cart.length;
+
+      if (cart.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px 0; font-size:13px;">Your cart is empty.<br>Add items to test AI checkout!</div>`;
+        subtotalEl.textContent = "₹0.00";
+        btnCheckout.disabled = true;
+        return;
+      }
+
+      btnCheckout.disabled = false;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      subtotalEl.textContent = `₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+      listEl.innerHTML = cart.map(item => `
+        <div class="cart-item-row">
+          <div>
+            <div class="name">${item.name}</div>
+            <button class="btn-remove" onclick="removeFromCart(${item.cartId})">Delete</button>
+          </div>
+          <div class="price">₹${item.price.toLocaleString('en-IN')}</div>
+        </div>
+      `).join('');
+    }
+
+    async function submitAgentOrder() {
+      if (cart.length === 0) return;
+      if (!activeAgent) await initAgent();
+
+      const modal = document.getElementById('decision-modal');
+      const iconBadge = document.getElementById('modal-icon-badge');
+      const titleText = document.getElementById('modal-title-text');
+      const subtitleText = document.getElementById('modal-subtitle');
+      const bodyEl = document.getElementById('modal-content-body');
+      const actionsEl = document.getElementById('modal-actions-container');
+
+      modal.style.display = 'flex';
+      iconBadge.className = 'modal-icon';
+      iconBadge.textContent = '⏳';
+      iconBadge.style.background = '#e2e8f0';
+      titleText.textContent = "Gatekeeper Evaluating...";
+      subtitleText.textContent = "Checking security rules & spending limits...";
+      bodyEl.innerHTML = "<p style='text-align:center;'>Interception pipeline in progress...</p>";
+      actionsEl.innerHTML = "";
+
+      const pincode = document.getElementById('order-pincode').value.trim() || "560001";
+      const agentType = document.getElementById('agent-selector').value;
+
+      let agentId = activeAgent.agent_id;
+      let token = activeAgent.api_token;
+
+      if (agentType === 'revoked') {
+        // Register temporary agent and revoke it
+        const rRes = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'UnauthorizedAgent', customer_id: 'cust-amz-001', scopes: ['orders:buy'] })
+        });
+        const rData = await rRes.json();
+        await fetch(`/api/v1/agents/${rData.agent_id}/revoke`, { method: 'POST' });
+        agentId = rData.agent_id;
+        token = rData.api_token;
+      }
+
+      const orderPayload = {
+        agent_id: agentId,
+        api_token: token,
+        customer_id: "cust-amz-001",
+        action_type: "PURCHASE_ORDER",
+        payload: {
+          items: cart.map(it => ({
+            item_id: it.id,
+            name: it.name,
+            category: it.category,
+            unit_price_inr: it.price,
+            quantity: 1
+          })),
+          shipping_address: {
+            address_line: "Flat 402, Green Palms, MG Road",
+            city: pincode === "400001" ? "Mumbai" : "Bengaluru",
+            state: pincode === "400001" ? "Maharashtra" : "Karnataka",
+            pincode: pincode
+          }
+        }
+      };
+
+      try {
+        const response = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        });
+        const result = await response.json();
+
+        // 1. ALLOW
+        if (result.decision === 'ALLOW') {
+          iconBadge.className = 'modal-icon verdict-allow';
+          iconBadge.textContent = '✓';
+          titleText.textContent = "Order Placed Successfully! (ALLOW)";
+          subtitleText.textContent = "Request approved by Gatekeeper policy.";
+          
+          const order = result.execution_result;
+          bodyEl.innerHTML = `
+            <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Gatekeeper Verified & Approved</div>
+            <p><strong>Order ID:</strong> <code>${order.order_id}</code></p>
+            <p><strong>Total Amount:</strong> ₹${order.total_amount.toLocaleString('en-IN')}</p>
+            <p><strong>Delivery PIN:</strong> ${order.shipping_address.pincode}</p>
+            <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">Audit Reference: <code>${result.audit_id}</code></p>
+          `;
+          actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="completeOrderSuccess()">Done</button>`;
+        }
+        // 2. ASK CUSTOMER
+        else if (result.decision === 'ASK CUSTOMER') {
+          currentPendingApprovalId = result.approval_id;
+          iconBadge.className = 'modal-icon verdict-ask';
+          iconBadge.textContent = '⚠️';
+          titleText.textContent = "Customer Approval Required (ASK CUSTOMER)";
+          subtitleText.textContent = "Human-in-the-Loop verification triggered.";
+
+          bodyEl.innerHTML = `
+            <div style="background:var(--ask-bg); border-left:4px solid var(--ask); padding:10px; margin-bottom:12px; font-size:13px; color:var(--ask);">
+              <strong>Security Rule Triggered:</strong> ${result.reason}
+            </div>
+            <p style="font-size:13px;">
+              Your AI Shopping Bot requested an order of <strong>₹${cart.reduce((s,i)=>s+i.price,0).toLocaleString('en-IN')}</strong>. 
+              As the Amazon Account Holder, do you authorize this transaction?
+            </p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Approval Token: <code>${result.approval_id}</code></p>
+          `;
+
+          actionsEl.innerHTML = `
+            <button class="btn-checkout" style="background:#067d62; border-color:#067d62; color:white; width:auto; padding:8px 20px;" onclick="resolveCustomerApproval('APPROVED')">
+              ✓ Authorize & Place Order
+            </button>
+            <button class="btn-checkout" style="background:#ba0933; border-color:#ba0933; color:white; width:auto; padding:8px 20px;" onclick="resolveCustomerApproval('REJECTED')">
+              ✕ Deny Order
+            </button>
+          `;
+        }
+        // 3. BLOCK
+        else if (result.decision === 'BLOCK') {
+          iconBadge.className = 'modal-icon verdict-block';
+          iconBadge.textContent = '⛔';
+          titleText.textContent = "Transaction Blocked (BLOCK)";
+          subtitleText.textContent = "Request violates security or budget policy.";
+
+          bodyEl.innerHTML = `
+            <div style="background:var(--block-bg); border-left:4px solid var(--block); padding:10px; margin-bottom:12px; font-size:13px; color:var(--block);">
+              <strong>Security Policy Violation:</strong> ${result.reason}
+            </div>
+            <p style="font-size:13px;">
+              The Gatekeeper has refused execution of this request to protect your Amazon India account.
+            </p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Logged to Audit Trail: <code>${result.audit_id}</code></p>
+          `;
+
+          actionsEl.innerHTML = `<button class="btn-checkout" style="background:#565959; border-color:#565959; color:white; width:auto; padding:8px 20px;" onclick="closeModal()">Close</button>`;
+        }
+
+      } catch (err) {
+        iconBadge.textContent = '✕';
+        titleText.textContent = "Error";
+        bodyEl.innerHTML = `<p style="color:red;">Error connecting to Gatekeeper: ${err.message}</p>`;
+        actionsEl.innerHTML = `<button class="btn-checkout" onclick="closeModal()">Close</button>`;
+      }
+    }
+
+    async function resolveCustomerApproval(decision) {
+      if (!currentPendingApprovalId) return;
+      const res = await fetch(`/api/v1/approvals/${currentPendingApprovalId}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: decision })
+      });
+      const data = await res.json();
+      
+      const bodyEl = document.getElementById('modal-content-body');
+      const actionsEl = document.getElementById('modal-actions-container');
+
+      if (decision === 'APPROVED') {
+        bodyEl.innerHTML = `
+          <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Customer Authorization Verified!</div>
+          <p>The held transaction has been approved and placed into the Amazon India order system.</p>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">Status: <strong>${data.status}</strong></p>
+        `;
+        actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="completeOrderSuccess()">Finish</button>`;
+      } else {
+        bodyEl.innerHTML = `
+          <div style="color:var(--block); font-weight:700; margin-bottom:8px;">✕ Order Rejected by Customer</div>
+          <p>The pending AI purchase has been successfully cancelled and rejected.</p>
+        `;
+        actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="closeModal()">Close</button>`;
+      }
+    }
+
+    function completeOrderSuccess() {
+      cart = [];
+      updateCartUI();
+      closeModal();
+    }
+
+    function closeModal() {
+      document.getElementById('decision-modal').style.display = 'none';
+    }
+
+    function scrollToCart() {
+      document.getElementById('cart-sidebar').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Init on page load
+    initAgent();
+    renderProducts();
+  </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ from src.audit.router import router as audit_router
 from src.gatekeeper.router import router as gatekeeper_router
 
 UI_HTML_PATH = Path(__file__).resolve().parent / "ui" / "dashboard.html"
+STORE_HTML_PATH = Path(__file__).resolve().parent / "ui" / "client_storefront.html"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,11 +46,20 @@ app.include_router(audit_router)
 
 @app.get("/", response_class=HTMLResponse, tags=["Web UI"])
 def web_dashboard():
-    """Serves the interactive Agent Gatekeeper UI Dashboard."""
+    """Serves the interactive Agent Gatekeeper Security & Governance Portal."""
     if UI_HTML_PATH.exists():
         with open(UI_HTML_PATH, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     return HTMLResponse("<h2>Dashboard HTML not found.</h2>")
+
+@app.get("/store", response_class=HTMLResponse, tags=["Client Storefront"])
+@app.get("/shop", response_class=HTMLResponse, tags=["Client Storefront"])
+def client_storefront():
+    """Serves the dedicated Amazon India Client Storefront for live customer shopping & AI checkout."""
+    if STORE_HTML_PATH.exists():
+        with open(STORE_HTML_PATH, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse("<h2>Storefront HTML not found.</h2>")
 
 @app.get("/api", tags=["System"])
 def api_root():
@@ -60,7 +70,8 @@ def api_root():
         "version": VERSION,
         "status": "OPERATIONAL",
         "docs_url": "/docs",
-        "ui_url": "/",
+        "gatekeeper_portal_url": "/",
+        "client_storefront_url": "/store",
         "supported_verdicts": ["ALLOW", "ASK CUSTOMER", "BLOCK"]
     }
 
