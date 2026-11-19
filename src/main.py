@@ -1,6 +1,8 @@
 """Agent Gatekeeper - Main FastAPI Application."""
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import PROJECT_NAME, BUSINESS_CATEGORY, VERSION
 from src.core.database import init_db
@@ -9,6 +11,8 @@ from src.store.router import router as store_router
 from src.approvals.router import router as approvals_router
 from src.audit.router import router as audit_router
 from src.gatekeeper.router import router as gatekeeper_router
+
+UI_HTML_PATH = Path(__file__).resolve().parent / "ui" / "dashboard.html"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,8 +43,16 @@ app.include_router(store_router)
 app.include_router(approvals_router)
 app.include_router(audit_router)
 
-@app.get("/", tags=["System"])
-def root():
+@app.get("/", response_class=HTMLResponse, tags=["Web UI"])
+def web_dashboard():
+    """Serves the interactive Agent Gatekeeper UI Dashboard."""
+    if UI_HTML_PATH.exists():
+        with open(UI_HTML_PATH, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse("<h2>Dashboard HTML not found.</h2>")
+
+@app.get("/api", tags=["System"])
+def api_root():
     return {
         "system": PROJECT_NAME,
         "business_category": BUSINESS_CATEGORY,
@@ -48,6 +60,7 @@ def root():
         "version": VERSION,
         "status": "OPERATIONAL",
         "docs_url": "/docs",
+        "ui_url": "/",
         "supported_verdicts": ["ALLOW", "ASK CUSTOMER", "BLOCK"]
     }
 

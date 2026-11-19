@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Gatekeeper | Amazon India Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --amz-navy: #131921;
+      --amz-dark: #232f3e;
+      --amz-orange: #ff9900;
+      --amz-orange-dark: #e88b00;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --allow: #16a34a;
+      --allow-bg: #dcfce7;
+      --ask: #ea580c;
+      --ask-bg: #ffedd5;
+      --block: #dc2626;
+      --block-bg: #fee2e2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    header {
+      background-color: var(--amz-navy);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand span { background: var(--amz-orange); color: var(--amz-navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; }
+    .header-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      margin-left: 16px;
+      transition: color 0.2s;
+    }
+    .header-links a:hover { color: var(--amz-orange); }
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background-color: var(--card-bg);
+      color: var(--amz-dark);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+    .scenario-btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .scenario-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .scenario-btn:hover { border-color: var(--amz-orange); background: #fffcf8; }
+    .scenario-title { font-size: 14px; font-weight: 600; }
+    .scenario-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .badge-allow { background: var(--allow-bg); color: var(--allow); }
+    .badge-ask { background: var(--ask-bg); color: var(--ask); }
+    .badge-block { background: var(--block-bg); color: var(--block); }
+
+    .console-output {
+      background: #0f172a;
+      color: #f1f5f9;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      min-height: 260px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .table-container { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: #f8fafc; padding: 12px; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-muted); }
+    td { padding: 12px; border-bottom: 1px solid var(--border); }
+    tr:hover { background: #fdfdfd; }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    .btn-approve { background: var(--allow); color: white; margin-right: 6px; }
+    .btn-reject { background: var(--block); color: white; }
+    .action-btn:hover { opacity: 0.9; }
+
+    .banner {
+      background: #e0f2fe;
+      border-left: 4px solid #0284c7;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #0369a1;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>Agent Gatekeeper</h1>
+      <span>Amazon India</span>
+    </div>
+    <div class="header-links">
+      <a href="/docs" target="_blank">Interactive Swagger API (/docs)</a>
+      <a href="https://github.com/abhinavkaundal35-rgb/agent-gatekeeper" target="_blank">GitHub Repo</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="banner">
+      <strong>Prototype Active:</strong> Intercepting customer AI agent requests and returning real-time triage verdicts: 
+      <span class="badge badge-allow">ALLOW</span> 
+      <span class="badge badge-ask">ASK CUSTOMER</span> 
+      <span class="badge badge-block">BLOCK</span>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('simulator')">Gatekeeper Simulator</button>
+      <button class="tab-btn" onclick="switchTab('approvals')">Customer Approvals Queue</button>
+      <button class="tab-btn" onclick="switchTab('audit')">Audit Logs & Governance</button>
+      <button class="tab-btn" onclick="switchTab('store')">Orders & Catalog</button>
+    </div>
+
+    <!-- TAB 1: SIMULATOR -->
+    <div id="tab-simulator">
+      <div class="grid-2">
+        <div class="card">
+          <h2>
+            <span>Simulate AI Agent Requests</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Click to trigger</span>
+          </h2>
+          <div class="scenario-btn-group">
+            <button class="scenario-btn" onclick="runScenario('allow_routine')">
+              <div>
+                <div class="scenario-title">1. Routine Grocery Purchase (< ₹2,000)</div>
+                <div class="scenario-desc">Tea & Atta for ₹1,015 to saved Bengaluru PIN 560001</div>
+              </div>
+              <span class="badge badge-allow">ALLOW</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('ask_high_value')">
+              <div>
+                <div class="scenario-title">2. High-Value Electronics (₹4,499)</div>
+                <div class="scenario-desc">Echo Dot Smart Speaker exceeds automatic ₹2,000 threshold</div>
+              </div>
+              <span class="badge badge-ask">ASK CUSTOMER</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('ask_new_address')">
+              <div>
+                <div class="scenario-title">3. Unverified Shipping Address</div>
+                <div class="scenario-desc">Shirt for ₹899 sent to unverified Mumbai PIN 400001</div>
+              </div>
+              <span class="badge badge-ask">ASK CUSTOMER</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('block_revoked')">
+              <div>
+                <div class="scenario-title">4. Decommissioned / Revoked Agent</div>
+                <div class="scenario-desc">Request from an agent whose credentials have been revoked</div>
+              </div>
+              <span class="badge badge-block">BLOCK</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('block_hard_cap')">
+              <div>
+                <div class="scenario-title">5. Hard Spending Cap Exceeded</div>
+                <div class="scenario-desc">Gold Pendant for ₹18,500 exceeds maximum cap of ₹15,000</div>
+              </div>
+              <span class="badge badge-block">BLOCK</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('block_expired_return')">
+              <div>
+                <div class="scenario-title">6. Expired Return Window</div>
+                <div class="scenario-desc">Return requested 14 days after delivery (Policy: 7 days)</div>
+              </div>
+              <span class="badge badge-block">BLOCK</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Gatekeeper Interceptor Response</h2>
+          <div id="console-output" class="console-output">// Gatekeeper output will appear here after clicking a scenario...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: APPROVALS -->
+    <div id="tab-approvals" style="display: none;">
+      <div class="card">
+        <h2>
+          <span>Customer Approval Queue (Human-in-the-Loop)</span>
+          <button class="action-btn" style="background:#0284c7; color:white;" onclick="loadApprovals()">Refresh</button>
+        </h2>
+        <div class="table-container">
+          <table id="approvals-table">
+            <thead>
+              <tr>
+                <th>Approval ID</th>
+                <th>Action</th>
+                <th>Challenge Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No pending approvals.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: AUDIT -->
+    <div id="tab-audit" style="display: none;">
+      <div class="card">
+        <h2>
+          <span>Immutable Audit Log Trail</span>
+          <button class="action-btn" style="background:#0284c7; color:white;" onclick="loadAuditLogs()">Refresh Logs</button>
+        </h2>
+        <div class="table-container">
+          <table id="audit-table">
+            <thead>
+              <tr>
+                <th>Timestamp (UTC)</th>
+                <th>Action</th>
+                <th>Decision</th>
+                <th>Status</th>
+                <th>Payload Summary</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Loading logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: STORE & ORDERS -->
+    <div id="tab-store" style="display: none;">
+      <div class="card">
+        <h2>Placed Amazon India Orders</h2>
+        <div class="table-container">
+          <table id="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Amount (INR)</th>
+                <th>Status</th>
+                <th>Shipping PIN</th>
+                <th>Items Count</th>
+                <th>Placed At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Loading orders...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let activeAgentId = null;
+    let activeToken = null;
+
+    // Auto-register agent on page load
+    async function initAgent() {
+      try {
+        const res = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'WebUIAssistantBot',
+            customer_id: 'cust-amz-001',
+            scopes: ['orders:view', 'orders:buy', 'returns:create']
+          })
+        });
+        const data = await res.json();
+        activeAgentId = data.agent_id;
+        activeToken = data.api_token;
+      } catch (err) {
+        console.error("Init error:", err);
+      }
+    }
+
+    async function runScenario(type) {
+      if (!activeAgentId) await initAgent();
+      const consoleEl = document.getElementById('console-output');
+      consoleEl.textContent = "Processing request through Gatekeeper Pipeline...";
+
+      let payloadReq = {};
+      if (type === 'allow_routine') {
+        payloadReq = {
+          agent_id: activeAgentId,
+          api_token: activeToken,
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [
+              { item_id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", unit_price_inr: 520.0, quantity: 1 },
+              { item_id: "AMZ-GROC-02", name: "Aashirvaad Atta 10kg", category: "Grocery", unit_price_inr: 495.0, quantity: 1 }
+            ],
+            shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+          }
+        };
+      } else if (type === 'ask_high_value') {
+        payloadReq = {
+          agent_id: activeAgentId,
+          api_token: activeToken,
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [{ item_id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", unit_price_inr: 4499.0, quantity: 1 }],
+            shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+          }
+        };
+      } else if (type === 'ask_new_address') {
+        payloadReq = {
+          agent_id: activeAgentId,
+          api_token: activeToken,
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [{ item_id: "AMZ-FASH-01", name: "Cotton Casual Shirt", category: "Fashion", unit_price_inr: 899.0, quantity: 1 }],
+            shipping_address: { address_line: "15 Marine Drive", city: "Mumbai", state: "Maharashtra", pincode: "400001" }
+          }
+        };
+      } else if (type === 'block_revoked') {
+        // Create and immediately revoke an agent
+        const regRes = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'TempRevokedBot', customer_id: 'cust-amz-001', scopes: ['orders:buy'] })
+        });
+        const regData = await regRes.json();
+        await fetch(`/api/v1/agents/${regData.agent_id}/revoke`, { method: 'POST' });
+
+        payloadReq = {
+          agent_id: regData.agent_id,
+          api_token: regData.api_token,
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [{ item_id: "AMZ-GROC-01", name: "Tea", category: "Grocery", unit_price_inr: 520.0, quantity: 1 }],
+            shipping_address: { address_line: "MG Road", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+          }
+        };
+      } else if (type === 'block_hard_cap') {
+        payloadReq = {
+          agent_id: activeAgentId,
+          api_token: activeToken,
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [{ item_id: "AMZ-JEWL-01", name: "Kalyan Jewellers Gold Pendant", category: "Jewelry", unit_price_inr: 18500.0, quantity: 1 }],
+            shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+          }
+        };
+      } else if (type === 'block_expired_return') {
+        payloadReq = {
+          agent_id: activeAgentId,
+          api_token: activeToken,
+          customer_id: "cust-amz-001",
+          action_type: "RETURN_REQUEST",
+          payload: {
+            order_id: "ord-past-01",
+            item_id: "AMZ-ELEC-01",
+            reason: "Defective item",
+            refund_amount: 4499.0,
+            days_since_delivery: 14,
+            category: "Electronics"
+          }
+        };
+      }
+
+      try {
+        const res = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadReq)
+        });
+        const data = await res.json();
+        consoleEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        consoleEl.textContent = "Error: " + err.message;
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-simulator').style.display = tab === 'simulator' ? 'block' : 'none';
+      document.getElementById('tab-approvals').style.display = tab === 'approvals' ? 'block' : 'none';
+      document.getElementById('tab-audit').style.display = tab === 'audit' ? 'block' : 'none';
+      document.getElementById('tab-store').style.display = tab === 'store' ? 'block' : 'none';
+
+      if (tab === 'approvals') loadApprovals();
+      if (tab === 'audit') loadAuditLogs();
+      if (tab === 'store') loadOrders();
+    }
+
+    async function loadApprovals() {
+      const res = await fetch('/api/v1/approvals');
+      const approvals = await res.json();
+      const tbody = document.querySelector('#approvals-table tbody');
+      if (approvals.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No approvals on record.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = approvals.map(app => `
+        <tr>
+          <td><code>${app.approval_id}</code></td>
+          <td><strong>${app.action_type}</strong></td>
+          <td>${app.challenge_message}</td>
+          <td><span class="badge ${app.status === 'APPROVED' ? 'badge-allow' : (app.status === 'PENDING' ? 'badge-ask' : 'badge-block')}">${app.status}</span></td>
+          <td>
+            ${app.status === 'PENDING' ? `
+              <button class="action-btn btn-approve" onclick="respondApproval('${app.approval_id}', 'APPROVED')">Approve</button>
+              <button class="action-btn btn-reject" onclick="respondApproval('${app.approval_id}', 'REJECTED')">Reject</button>
+            ` : '<span style="color:var(--text-muted); font-size:12px;">Resolved</span>'}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function respondApproval(id, decision) {
+      await fetch(`/api/v1/approvals/${id}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: decision })
+      });
+      loadApprovals();
+    }
+
+    async function loadAuditLogs() {
+      const res = await fetch('/api/v1/audit?limit=20');
+      const logs = await res.json();
+      const tbody = document.querySelector('#audit-table tbody');
+      if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No audit records.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td><small>${l.timestamp.replace('T', ' ').substring(0, 19)}</small></td>
+          <td><strong>${l.action_type}</strong></td>
+          <td><span class="badge ${l.decision === 'ALLOW' ? 'badge-allow' : (l.decision === 'ASK CUSTOMER' ? 'badge-ask' : 'badge-block')}">${l.decision}</span></td>
+          <td><small>${l.execution_status}</small></td>
+          <td>${l.payload_summary}</td>
+          <td><small style="color:var(--text-muted);">${l.reason}</small></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadOrders() {
+      const res = await fetch('/api/v1/store/orders');
+      const orders = await res.json();
+      const tbody = document.querySelector('#orders-table tbody');
+      if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No placed orders yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td><code>${o.order_id}</code></td>
+          <td><strong>₹${o.total_amount.toLocaleString('en-IN')}</strong></td>
+          <td><span class="badge badge-allow">${o.status}</span></td>
+          <td>${o.shipping_address.pincode}</td>
+          <td>${o.items.length} items</td>
+          <td><small>${o.placed_at.replace('T', ' ').substring(0, 19)}</small></td>
+        </tr>
+      `).join('');
+    }
+
+    // Initialize on load
+    initAgent();
+  </script>
+</body>
+</html>
