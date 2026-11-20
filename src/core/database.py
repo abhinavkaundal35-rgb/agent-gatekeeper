@@ -115,8 +115,8 @@ def init_db(db_path: Optional[str] = None) -> None:
 
     # Seed initial test customer if not exists
     cursor.execute("SELECT customer_id FROM customers WHERE customer_id = 'cust-amz-001'")
+    now_iso = datetime.now(timezone.utc).isoformat()
     if not cursor.fetchone():
-        now_iso = datetime.now(timezone.utc).isoformat()
         cursor.execute("""
         INSERT INTO customers (customer_id, name, email, verified_pincodes, default_address, created_at)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -133,6 +133,68 @@ def init_db(db_path: Optional[str] = None) -> None:
             }),
             now_iso
         ))
-        conn.commit()
 
+    # Seed specialized agents for distinct tasks (Teacher Requirement)
+    specialized_agents = [
+        (
+            "agent-allow-001",
+            "cust-amz-001",
+            "RoutineShopperBot (ALLOW Agent)",
+            "ACTIVE",
+            "amz_gatekeeper_token_allow_001",
+            json.dumps(["orders:buy", "orders:view"]),
+            now_iso,
+            None
+        ),
+        (
+            "agent-ask-002",
+            "cust-amz-001",
+            "HighValueBuyerBot (ASK CUSTOMER Agent)",
+            "ACTIVE",
+            "amz_gatekeeper_token_ask_002",
+            json.dumps(["orders:buy", "orders:view"]),
+            now_iso,
+            None
+        ),
+        (
+            "agent-history-003",
+            "cust-amz-001",
+            "HistoryCheckerBot (HISTORY CHECK Agent)",
+            "ACTIVE",
+            "amz_gatekeeper_token_history_003",
+            json.dumps(["orders:view"]),  # Read-only scope: blocks on buy attempts!
+            now_iso,
+            None
+        ),
+        (
+            "agent-block-004",
+            "cust-amz-001",
+            "DecommissionedBot (BLOCK Agent)",
+            "REVOKED",
+            "amz_gatekeeper_token_block_004",
+            json.dumps(["orders:buy", "orders:view"]),
+            now_iso,
+            now_iso  # Revoked timestamp
+        ),
+        (
+            "agent-return-005",
+            "cust-amz-001",
+            "ReturnsRefundBot (RETURNS Agent)",
+            "ACTIVE",
+            "amz_gatekeeper_token_return_005",
+            json.dumps(["returns:create", "returns:view", "orders:view"]),
+            now_iso,
+            None
+        )
+    ]
+
+    for ag in specialized_agents:
+        cursor.execute("SELECT agent_id FROM agents WHERE agent_id = ?", (ag[0],))
+        if not cursor.fetchone():
+            cursor.execute("""
+            INSERT INTO agents (agent_id, customer_id, name, status, api_token, scopes, created_at, revoked_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, ag)
+
+    conn.commit()
     conn.close()

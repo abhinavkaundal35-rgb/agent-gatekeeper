@@ -220,11 +220,12 @@
     </div>
 
     <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('client')">🛒 Client Storefront & AI Agent</button>
-      <button class="tab-btn" onclick="switchTab('simulator')">🛡️ Gatekeeper Policy Console</button>
-      <button class="tab-btn" onclick="switchTab('approvals')">📱 Customer Approval Queue</button>
-      <button class="tab-btn" onclick="switchTab('audit')">📜 Audit Trail & Governance</button>
-      <button class="tab-btn" onclick="switchTab('code')">💻 Client SDK & API Code</button>
+      <button class="tab-btn active" id="tab-btn-client" onclick="switchTab('client')">🛒 Client Storefront & AI Agent</button>
+      <button class="tab-btn" id="tab-btn-agents" onclick="switchTab('agents')">🤖 Specialized Agents Registry</button>
+      <button class="tab-btn" id="tab-btn-simulator" onclick="switchTab('simulator')">🛡️ Gatekeeper Policy Console</button>
+      <button class="tab-btn" id="tab-btn-approvals" onclick="switchTab('approvals')">📱 Customer Approval Queue</button>
+      <button class="tab-btn" id="tab-btn-audit" onclick="switchTab('audit')">📜 Audit Trail & Governance</button>
+      <button class="tab-btn" id="tab-btn-code" onclick="switchTab('code')">💻 Client SDK & API Code</button>
     </div>
 
     <!-- TAB 1: EMBEDDED CLIENT STOREFRONT (AMAZON INDIA) -->
@@ -244,7 +245,84 @@
       </div>
     </div>
 
-    <!-- TAB 2: GATEKEEPER SIMULATOR CONSOLE -->
+    <!-- TAB 2: SPECIALIZED AI AGENTS REGISTRY (TEACHER REQUIREMENT) -->
+    <div id="tab-agents" style="display: none;">
+      <div class="banner" style="background:#eff6ff; border-left:4px solid #3b82f6; color:#1e40af;">
+        <strong>Academic Requirement: Distinct AI Agents for Specific Work:</strong><br>
+        To uphold the Principle of Least Privilege, each customer AI agent is assigned a dedicated responsibility with unique cryptographic tokens and scoped permissions:
+        <ul style="margin:6px 0 0 20px; font-size:12px; line-height:1.5;">
+          <li><strong style="color:#16a34a;">ALLOW Agent</strong> (<code>agent-allow-001</code>): Routine shopping under ₹2,000 threshold (Auto-Approved).</li>
+          <li><strong style="color:#d97706;">ASK CUSTOMER Agent</strong> (<code>agent-ask-002</code>): High-value shopping over ₹2,000 (Requires Customer Challenge Approval).</li>
+          <li><strong style="color:#2563eb;">HISTORY CHECK Agent</strong> (<code>agent-history-003</code>): Read-only past orders auditor (Scope: <code>orders:view</code>). Buying attempts are <strong>BLOCKED</strong>!</li>
+          <li><strong style="color:#dc2626;">BLOCK Agent</strong> (<code>agent-block-004</code>): Revoked/decommissioned bot. Any request is immediately <strong>BLOCKED</strong> by Rule SEC-R01.</li>
+          <li><strong style="color:#9333ea;">RETURNS Agent</strong> (<code>agent-return-005</code>): Dedicated return filing specialist (Scopes: <code>returns:create, returns:view, orders:view</code>).</li>
+        </ul>
+      </div>
+
+      <!-- Agent Registry Table Card -->
+      <div class="card">
+        <h2>
+          <span>Specialized AI Agents Registry (Live SQLite Database)</span>
+          <button class="action-btn" style="background:#0284c7; color:white;" onclick="loadAgentsRegistry()">Refresh Registry</button>
+        </h2>
+        <div class="table-container">
+          <table id="agents-table">
+            <thead>
+              <tr>
+                <th>Agent ID</th>
+                <th>Agent Name</th>
+                <th>Assigned Task</th>
+                <th>Scopes</th>
+                <th>Status</th>
+                <th>Expected Verdict</th>
+                <th>Interactive 1-Click Test</th>
+              </tr>
+            </thead>
+            <tbody id="agents-tbody">
+              <tr><td colspan="7" style="text-align:center;">Loading specialized agents...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Register Dynamic Agent -->
+        <div class="card">
+          <h2>Register Another Specialized AI Agent</h2>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+            Dynamically register a new agent into the SQLite database with custom permissions:
+          </p>
+          <div class="form-group">
+            <label>Agent Name</label>
+            <input type="text" id="new-agent-name" placeholder="e.g. MidnightDealHunterBot">
+          </div>
+          <div class="form-group">
+            <label>Customer ID</label>
+            <input type="text" id="new-agent-customer" value="cust-amz-001" readonly style="background:#f1f5f9;">
+          </div>
+          <div class="form-group">
+            <label>Assign Scopes (Principle of Least Privilege)</label>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; margin-top:4px;">
+              <label><input type="checkbox" id="scope-buy" checked> <code>orders:buy</code> - Allow purchasing items</label>
+              <label><input type="checkbox" id="scope-view" checked> <code>orders:view</code> - Allow querying order history</label>
+              <label><input type="checkbox" id="scope-return"> <code>returns:create</code> - Allow submitting return requests</label>
+            </div>
+          </div>
+          <button class="action-btn btn-primary" style="width:100%;" onclick="registerNewAgentFromUI()">+ Register Agent</button>
+        </div>
+
+        <!-- Live Evaluation Console -->
+        <div class="card">
+          <h2>
+            <span>Agent Test Console & Verdict</span>
+            <span id="agent-test-verdict-badge"></span>
+          </h2>
+          <div id="agent-test-console" class="console-output">// Click any "Test" button above to evaluate an agent live through the Gatekeeper Pipeline...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: GATEKEEPER SIMULATOR CONSOLE -->
     <div id="tab-simulator" style="display: none;">
       <div class="grid-2">
         <div class="card">
@@ -654,15 +732,186 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
       document.getElementById('tab-client').style.display = tab === 'client' ? 'block' : 'none';
+      document.getElementById('tab-agents').style.display = tab === 'agents' ? 'block' : 'none';
       document.getElementById('tab-simulator').style.display = tab === 'simulator' ? 'block' : 'none';
       document.getElementById('tab-approvals').style.display = tab === 'approvals' ? 'block' : 'none';
       document.getElementById('tab-audit').style.display = tab === 'audit' ? 'block' : 'none';
       document.getElementById('tab-code').style.display = tab === 'code' ? 'block' : 'none';
 
+      if (tab === 'agents') loadAgentsRegistry();
       if (tab === 'approvals') loadApprovals();
       if (tab === 'audit') loadAuditLogs();
+    }
+
+    const specializedAgentTokens = {
+      "agent-allow-001": "amz_gatekeeper_token_allow_001",
+      "agent-ask-002": "amz_gatekeeper_token_ask_002",
+      "agent-history-003": "amz_gatekeeper_token_history_003",
+      "agent-block-004": "amz_gatekeeper_token_block_004",
+      "agent-return-005": "amz_gatekeeper_token_return_005"
+    };
+
+    async function loadAgentsRegistry() {
+      try {
+        const res = await fetch('/api/v1/agents');
+        const agents = await res.json();
+        const tbody = document.getElementById('agents-tbody');
+
+        if (agents.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No agents registered.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = agents.map(ag => {
+          let roleName = "Custom Agent";
+          let expectedVerdict = '<span class="badge badge-allow">ALLOW</span>';
+          let testButtons = '';
+
+          if (ag.agent_id === 'agent-allow-001') {
+            roleName = "🟢 Routine Shopping (< ₹2,000)";
+            expectedVerdict = '<span class="badge badge-allow">ALLOW</span>';
+            testButtons = `<button class="action-btn" style="background:#16a34a; color:white; width:100%;" onclick="testAgentAction('agent-allow-001', 'PURCHASE_ROUTINE')">Test Routine Buy (< ₹2k)</button>`;
+          } else if (ag.agent_id === 'agent-ask-002') {
+            roleName = "🟡 High-Value Buyer (> ₹2,000)";
+            expectedVerdict = '<span class="badge badge-ask">ASK CUSTOMER</span>';
+            testButtons = `<button class="action-btn" style="background:#ea580c; color:white; width:100%;" onclick="testAgentAction('agent-ask-002', 'PURCHASE_HIGH_VALUE')">Test High-Value Buy (> ₹2k)</button>`;
+          } else if (ag.agent_id === 'agent-history-003') {
+            roleName = "🔵 Order History Auditor";
+            expectedVerdict = '<span class="badge badge-allow">ALLOW (View)</span><br><span class="badge badge-block" style="margin-top:2px;">BLOCK (Buy)</span>';
+            testButtons = `
+              <button class="action-btn" style="background:#0284c7; color:white; width:100%; margin-bottom:4px;" onclick="testAgentAction('agent-history-003', 'VIEW_ORDERS')">Test View Orders</button>
+              <button class="action-btn" style="background:#dc2626; color:white; width:100%;" onclick="testAgentAction('agent-history-003', 'PURCHASE_ROUTINE')">Test Buy Attempt (Will Block)</button>
+            `;
+          } else if (ag.agent_id === 'agent-block-004') {
+            roleName = "🔴 Revoked / Compromised";
+            expectedVerdict = '<span class="badge badge-block">BLOCK (SEC-R01)</span>';
+            testButtons = `<button class="action-btn" style="background:#dc2626; color:white; width:100%;" onclick="testAgentAction('agent-block-004', 'PURCHASE_ROUTINE')">Test Revoked Agent</button>`;
+          } else if (ag.agent_id === 'agent-return-005') {
+            roleName = "🟣 Returns & Refunds";
+            expectedVerdict = '<span class="badge badge-allow">ALLOW (&le;7d)</span>';
+            testButtons = `<button class="action-btn" style="background:#9333ea; color:white; width:100%;" onclick="testAgentAction('agent-return-005', 'RETURN_REQUEST')">Test Return Request</button>`;
+          } else {
+            roleName = "Dynamic AI Agent";
+            expectedVerdict = '<span class="badge badge-allow">ALLOW (Scopes)</span>';
+            testButtons = `<button class="action-btn btn-primary" style="width:100%;" onclick="testAgentAction('${ag.agent_id}', 'VIEW_ORDERS')">Test Evaluation</button>`;
+          }
+
+          return `
+            <tr>
+              <td><code>${ag.agent_id}</code></td>
+              <td><strong>${ag.name}</strong></td>
+              <td><span style="font-size:12px; font-weight:600;">${roleName}</span></td>
+              <td>${ag.scopes.map(s => `<code style="font-size:11px;">${s}</code>`).join(' ')}</td>
+              <td><span class="badge ${ag.status === 'ACTIVE' ? 'badge-allow' : 'badge-block'}">${ag.status}</span></td>
+              <td>${expectedVerdict}</td>
+              <td style="min-width:170px;">${testButtons}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error("Agents load error:", err);
+      }
+    }
+
+    async function testAgentAction(agentId, testType) {
+      const consoleEl = document.getElementById('agent-test-console');
+      const verdictBadge = document.getElementById('agent-test-verdict-badge');
+      consoleEl.textContent = `Dispatching test for ${agentId} (${testType})...\nEvaluating via Gatekeeper Pipeline...`;
+      verdictBadge.innerHTML = '';
+
+      const token = specializedAgentTokens[agentId] || activeToken;
+      let actionType = "PURCHASE_ORDER";
+      let payload = {};
+
+      if (testType === 'PURCHASE_ROUTINE') {
+        actionType = "PURCHASE_ORDER";
+        payload = {
+          items: [{ item_id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", unit_price_inr: 520.0, quantity: 1 }],
+          shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+        };
+      } else if (testType === 'PURCHASE_HIGH_VALUE') {
+        actionType = "PURCHASE_ORDER";
+        payload = {
+          items: [{ item_id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", unit_price_inr: 4499.0, quantity: 1 }],
+          shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+        };
+      } else if (testType === 'VIEW_ORDERS') {
+        actionType = "VIEW_ORDERS";
+        payload = {};
+      } else if (testType === 'RETURN_REQUEST') {
+        actionType = "RETURN_REQUEST";
+        payload = {
+          order_id: "ord-past-01",
+          item_id: "AMZ-FASH-01",
+          reason: "Size did not fit",
+          refund_amount: 899.0,
+          days_since_delivery: 3,
+          category: "Fashion"
+        };
+      }
+
+      try {
+        const res = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_id: agentId,
+            api_token: token,
+            customer_id: "cust-amz-001",
+            action_type: actionType,
+            payload: payload
+          })
+        });
+        const data = await res.json();
+        consoleEl.textContent = JSON.stringify(data, null, 2);
+
+        if (data.decision === 'ALLOW') {
+          verdictBadge.innerHTML = '<span class="badge badge-allow">VERDICT: ALLOW</span>';
+        } else if (data.decision === 'ASK CUSTOMER') {
+          verdictBadge.innerHTML = '<span class="badge badge-ask">VERDICT: ASK CUSTOMER</span>';
+        } else if (data.decision === 'BLOCK') {
+          verdictBadge.innerHTML = '<span class="badge badge-block">VERDICT: BLOCK</span>';
+        }
+      } catch (err) {
+        consoleEl.textContent = "Error: " + err.message;
+      }
+    }
+
+    async function registerNewAgentFromUI() {
+      const name = document.getElementById('new-agent-name').value.trim();
+      const customerId = document.getElementById('new-agent-customer').value.trim();
+      if (!name) {
+        alert("Please enter an agent name.");
+        return;
+      }
+
+      const scopes = [];
+      if (document.getElementById('scope-buy').checked) scopes.push("orders:buy");
+      if (document.getElementById('scope-view').checked) scopes.push("orders:view");
+      if (document.getElementById('scope-return').checked) scopes.push("returns:create");
+
+      try {
+        const res = await fetch('/api/v1/agents/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            customer_id: customerId,
+            scopes: scopes
+          })
+        });
+        const data = await res.json();
+        specializedAgentTokens[data.agent_id] = data.api_token;
+        document.getElementById('new-agent-name').value = '';
+        alert(`Agent "${data.name}" (${data.agent_id}) registered successfully!`);
+        loadAgentsRegistry();
+      } catch (err) {
+        alert("Registration failed: " + err.message);
+      }
     }
 
     async function loadApprovals() {
@@ -721,6 +970,12 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
     // Initialize on load
     initAgent();
     renderCatalog();
+
+    // Check query params to activate specific tab directly
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'agents') {
+      switchTab('agents');
+    }
   </script>
 </body>
 </html>

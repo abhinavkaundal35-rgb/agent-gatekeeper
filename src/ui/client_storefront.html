@@ -320,6 +320,18 @@
     .btn-checkout:hover { background: var(--amz-orange-dark); }
     .btn-checkout:disabled { background: #e2e8f0; color: #94a3b8; border-color: #cbd5e1; cursor: not-allowed; }
 
+    .action-btn {
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .action-btn:hover { filter: brightness(0.95); }
+
     /* Gatekeeper Live Triage Modal */
     .modal-backdrop {
       display: none;
@@ -403,7 +415,10 @@
     <span class="category-pill" onclick="setCategoryFilter('Jewelry')">Jewelry & Luxury</span>
     <span class="category-pill" onclick="setCategoryFilter('Books')">Books & Stationery</span>
     <span class="category-pill" onclick="setCategoryFilter('Beauty')">Beauty & Personal Care</span>
-    <a href="/docs" target="_blank" style="margin-left:auto; color:#febd69; text-decoration:none; padding:4px 8px;">Gatekeeper API Docs (/docs)</a>
+    <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
+      <a href="/?tab=agents" target="_blank" style="color:#febd69; text-decoration:none; font-weight:600; font-size:12px;">🤖 Specialized Agents Registry ↗</a>
+      <a href="/docs" target="_blank" style="color:#cbd5e1; text-decoration:none; font-size:12px;">API Docs (/docs)</a>
+    </div>
   </div>
 
   <div class="container">
@@ -458,14 +473,28 @@
               (Change to <strong>400001</strong> to trigger address mismatch check)
             </small>
 
-            <label class="form-label">Acting AI Agent:</label>
-            <select id="agent-selector" class="form-control">
-              <option value="active">Active: SmartShopperBot (Authorized)</option>
-              <option value="revoked">Revoked: UnauthorizedBot (Revoked)</option>
+            <label class="form-label">Specialized Acting AI Agent:</label>
+            <select id="agent-selector" class="form-control" onchange="onAgentChanged()">
+              <option value="agent-allow-001">🟢 RoutineShopperBot (ALLOW: Routine Purchases)</option>
+              <option value="agent-ask-002">🟡 HighValueBuyerBot (ASK CUSTOMER: High Value)</option>
+              <option value="agent-history-003">🔵 HistoryCheckerBot (HISTORY CHECK: Read-Only)</option>
+              <option value="agent-block-004">🔴 DecommissionedBot (BLOCK: Revoked Agent)</option>
+              <option value="agent-return-005">🟣 ReturnsRefundBot (RETURNS: Returns & Refunds)</option>
             </select>
+            <div id="agent-meta-badge" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; font-size:11px; margin-bottom:12px; line-height:1.4;">
+              <strong style="color:#0f172a;">Assigned Job:</strong> <span id="agent-role-desc">Routine grocery & household shopping under ₹2,000 (ALLOW)</span><br>
+              <span style="color:var(--text-muted);">Scopes: <code id="agent-scopes-desc">orders:buy, orders:view</code> | Status: <span id="agent-status-desc" style="color:#16a34a; font-weight:700;">ACTIVE</span></span>
+              <div id="agent-hint" style="color:#0284c7; font-size:10px; margin-top:4px; font-style:italic;">💡 Tip: Add any item under ₹2,000 and click 'Proceed to Buy' for automatic ALLOW.</div>
+            </div>
 
             <button id="btn-submit-order" class="btn-checkout" onclick="submitAgentOrder()" disabled>
-              Proceed to Buy (via AI Agent)
+              Proceed to Buy (via Selected Agent)
+            </button>
+            <button class="action-btn" style="width:100%; margin-top:8px; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; font-weight:600;" onclick="checkOrderHistoryWithAgent()">
+              📜 Check Past Orders (via History Agent)
+            </button>
+            <button class="action-btn" style="width:100%; margin-top:6px; background:#fdf4ff; color:#7e22ce; border:1px solid #e9d5ff; font-weight:600;" onclick="testReturnWithAgent()">
+              🔄 Test Return Request (via Returns Agent)
             </button>
           </div>
         </div>
@@ -548,25 +577,77 @@
     ];
 
     let cart = [];
-    let activeAgent = null;
     let currentPendingApprovalId = null;
     let currentCategory = "ALL";
 
-    // Initialize registered agent
-    async function initAgent() {
-      try {
-        const res = await fetch('/api/v1/agents/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'AmazonSmartShopperBot',
-            customer_id: 'cust-amz-001',
-            scopes: ['orders:view', 'orders:buy', 'returns:create']
-          })
-        });
-        activeAgent = await res.json();
-      } catch (err) {
-        console.error("Agent init failed:", err);
+    // 5 Specialized AI Agents Registered for Distinct Tasks (Teacher Requirement)
+    const specializedAgents = {
+      "agent-allow-001": {
+        agent_id: "agent-allow-001",
+        name: "RoutineShopperBot",
+        role: "Routine grocery & household shopping under ₹2,000 auto-limit (ALLOW Agent)",
+        scopes: ["orders:buy", "orders:view"],
+        status: "ACTIVE",
+        token: "amz_gatekeeper_token_allow_001",
+        statusColor: "#16a34a",
+        hint: "💡 Tip: Add any item under ₹2,000 (e.g. Tata Tea ₹520, boAt Headphones ₹1,499) and click 'Proceed to Buy' for automatic ALLOW."
+      },
+      "agent-ask-002": {
+        agent_id: "agent-ask-002",
+        name: "HighValueBuyerBot",
+        role: "High-value purchase agent. Orders > ₹2,000 trigger Customer Approval Challenge (ASK CUSTOMER Agent)",
+        scopes: ["orders:buy", "orders:view"],
+        status: "ACTIVE",
+        token: "amz_gatekeeper_token_ask_002",
+        statusColor: "#d97706",
+        hint: "💡 Tip: Add an item > ₹2,000 (e.g. Echo Dot ₹4,499) and click 'Proceed to Buy' to trigger Human-in-the-Loop authorization!"
+      },
+      "agent-history-003": {
+        agent_id: "agent-history-003",
+        name: "HistoryCheckerBot",
+        role: "Audit & order history agent. Authorized for 'orders:view' only. Purchasing is strictly prohibited (HISTORY CHECK Agent)",
+        scopes: ["orders:view"],
+        status: "ACTIVE",
+        token: "amz_gatekeeper_token_history_003",
+        statusColor: "#2563eb",
+        hint: "🔒 Notice: If you try to BUY with this agent, Gatekeeper BLOCKS with SEC-R02 (Unauthorized Scope)! Click 'Check Past Orders' to see ALLOW."
+      },
+      "agent-block-004": {
+        agent_id: "agent-block-004",
+        name: "DecommissionedBot",
+        role: "Compromised / revoked agent. Access terminated immediately (BLOCK Agent)",
+        scopes: ["orders:buy", "orders:view"],
+        status: "REVOKED",
+        token: "amz_gatekeeper_token_block_004",
+        statusColor: "#dc2626",
+        hint: "⛔ Security Lock: Any request from this agent is intercepted and BLOCKED by Rule SEC-R01."
+      },
+      "agent-return-005": {
+        agent_id: "agent-return-005",
+        name: "ReturnsRefundBot",
+        role: "Customer returns & refund evaluation specialist (RETURNS Agent)",
+        scopes: ["returns:create", "returns:view", "orders:view"],
+        token: "amz_gatekeeper_token_return_005",
+        statusColor: "#9333ea",
+        hint: "🔄 Returns Specialist: Click 'Test Return Request' to evaluate return window (&le; 7 days) and non-returnable categories."
+      }
+    };
+
+    function onAgentChanged() {
+      const selectedKey = document.getElementById('agent-selector').value;
+      const agent = specializedAgents[selectedKey];
+      if (!agent) return;
+
+      document.getElementById('agent-role-desc').textContent = agent.role;
+      document.getElementById('agent-scopes-desc').textContent = agent.scopes.join(', ');
+      
+      const statusEl = document.getElementById('agent-status-desc');
+      statusEl.textContent = agent.status;
+      statusEl.style.color = agent.statusColor;
+
+      const hintEl = document.getElementById('agent-hint');
+      if (hintEl) {
+        hintEl.textContent = agent.hint || "";
       }
     }
 
@@ -661,7 +742,6 @@
 
     async function submitAgentOrder() {
       if (cart.length === 0) return;
-      if (!activeAgent) await initAgent();
 
       const modal = document.getElementById('decision-modal');
       const iconBadge = document.getElementById('modal-icon-badge');
@@ -680,26 +760,12 @@
       actionsEl.innerHTML = "";
 
       const pincode = document.getElementById('order-pincode').value.trim() || "560001";
-      const agentType = document.getElementById('agent-selector').value;
-
-      let agentId = activeAgent.agent_id;
-      let token = activeAgent.api_token;
-
-      if (agentType === 'revoked') {
-        const rRes = await fetch('/api/v1/agents/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: 'UnauthorizedAgent', customer_id: 'cust-amz-001', scopes: ['orders:buy'] })
-        });
-        const rData = await rRes.json();
-        await fetch(`/api/v1/agents/${rData.agent_id}/revoke`, { method: 'POST' });
-        agentId = rData.agent_id;
-        token = rData.api_token;
-      }
+      const selectedKey = document.getElementById('agent-selector').value;
+      const agent = specializedAgents[selectedKey] || specializedAgents["agent-allow-001"];
 
       const orderPayload = {
-        agent_id: agentId,
-        api_token: token,
+        agent_id: agent.agent_id,
+        api_token: agent.token,
         customer_id: "cust-amz-001",
         action_type: "PURCHASE_ORDER",
         payload: {
@@ -732,15 +798,16 @@
           iconBadge.className = 'modal-icon verdict-allow';
           iconBadge.textContent = '✓';
           titleText.textContent = "Order Placed Successfully! (ALLOW)";
-          subtitleText.textContent = "Request approved by Gatekeeper policy.";
+          subtitleText.textContent = `Executed by: ${agent.name} (${agent.agent_id})`;
           
           const order = result.execution_result;
           bodyEl.innerHTML = `
-            <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Gatekeeper Verified & Approved</div>
+            <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Gatekeeper Verified & Approved (Policy: Within Limit)</div>
             <p><strong>Order ID:</strong> <code>${order.order_id}</code></p>
             <p><strong>Total Amount:</strong> ₹${order.total_amount.toLocaleString('en-IN')}</p>
             <p><strong>Delivery PIN:</strong> ${order.shipping_address.pincode}</p>
-            <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">Audit Reference: <code>${result.audit_id}</code></p>
+            <p><strong>Authorized Agent:</strong> <code>${agent.name}</code> (Scopes: ${agent.scopes.join(', ')})</p>
+            <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">Audit Reference ID: <code>${result.audit_id}</code></p>
           `;
           actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="completeOrderSuccess()">Done</button>`;
         }
@@ -750,17 +817,17 @@
           iconBadge.className = 'modal-icon verdict-ask';
           iconBadge.textContent = '⚠️';
           titleText.textContent = "Customer Approval Required (ASK CUSTOMER)";
-          subtitleText.textContent = "Human-in-the-Loop verification triggered.";
+          subtitleText.textContent = `Evaluating request from: ${agent.name}`;
 
           bodyEl.innerHTML = `
             <div style="background:var(--ask-bg); border-left:4px solid var(--ask); padding:10px; margin-bottom:12px; font-size:13px; color:var(--ask);">
-              <strong>Security Rule Triggered:</strong> ${result.reason}
+              <strong>Security Challenge Triggered:</strong> ${result.reason}
             </div>
             <p style="font-size:13px;">
-              Your AI Shopping Bot requested an order of <strong>₹${cart.reduce((s,i)=>s+i.price,0).toLocaleString('en-IN')}</strong>. 
-              As the Amazon Account Holder, do you authorize this transaction?
+              Agent <strong>${agent.name}</strong> requested a purchase of <strong>₹${cart.reduce((s,i)=>s+i.price,0).toLocaleString('en-IN')}</strong>. 
+              As the Amazon India Account Holder, do you authorize this transaction?
             </p>
-            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Approval Token: <code>${result.approval_id}</code></p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Approval Token: <code>${result.approval_id}</code> | Rule: <code>${result.triggered_rule || "LIMIT-R02"}</code></p>
           `;
 
           actionsEl.innerHTML = `
@@ -777,16 +844,21 @@
           iconBadge.className = 'modal-icon verdict-block';
           iconBadge.textContent = '⛔';
           titleText.textContent = "Transaction Blocked (BLOCK)";
-          subtitleText.textContent = "Request violates security or budget policy.";
+          subtitleText.textContent = `Gatekeeper intercepted: ${agent.name}`;
 
           bodyEl.innerHTML = `
             <div style="background:var(--block-bg); border-left:4px solid var(--block); padding:10px; margin-bottom:12px; font-size:13px; color:var(--block);">
               <strong>Security Policy Violation:</strong> ${result.reason}
             </div>
             <p style="font-size:13px;">
-              The Gatekeeper has refused execution of this request to protect your Amazon India account.
+              <strong>Why this was blocked:</strong><br>
+              ${agent.status === 'REVOKED' 
+                ? `Agent <code>${agent.name}</code> is in <strong>REVOKED</strong> status. Access is permanently locked by rule <code>SEC-R01</code>.`
+                : (!agent.scopes.includes('orders:buy') 
+                  ? `Agent <code>${agent.name}</code> is registered specifically for <strong>${agent.role}</strong> and lacks the required <code>orders:buy</code> permission! Intercepted by rule <code>SEC-R02</code>.`
+                  : `The request violated security or spending bounds.`)}
             </p>
-            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Logged to Audit Trail: <code>${result.audit_id}</code></p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Logged to Immutable Audit Trail: <code>${result.audit_id}</code></p>
           `;
 
           actionsEl.innerHTML = `<button class="btn-checkout" style="background:#565959; border-color:#565959; color:white; width:auto; padding:8px 20px;" onclick="closeModal()">Close</button>`;
@@ -797,6 +869,191 @@
         titleText.textContent = "Error";
         bodyEl.innerHTML = `<p style="color:red;">Error connecting to Gatekeeper: ${err.message}</p>`;
         actionsEl.innerHTML = `<button class="btn-checkout" onclick="closeModal()">Close</button>`;
+      }
+    }
+
+    async function checkOrderHistoryWithAgent() {
+      const modal = document.getElementById('decision-modal');
+      const iconBadge = document.getElementById('modal-icon-badge');
+      const titleText = document.getElementById('modal-title-text');
+      const subtitleText = document.getElementById('modal-subtitle');
+      const bodyEl = document.getElementById('modal-content-body');
+      const actionsEl = document.getElementById('modal-actions-container');
+
+      modal.style.display = 'flex';
+      iconBadge.className = 'modal-icon';
+      iconBadge.textContent = '⏳';
+      iconBadge.style.background = '#e2e8f0';
+      titleText.textContent = "Querying Order History...";
+      subtitleText.textContent = "HistoryCheckerBot (agent-history-003) requesting orders...";
+      bodyEl.innerHTML = "<p style='text-align:center;'>Gatekeeper verifying scope 'orders:view'...</p>";
+      actionsEl.innerHTML = "";
+
+      const histAgent = specializedAgents["agent-history-003"];
+
+      try {
+        const res = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_id: histAgent.agent_id,
+            api_token: histAgent.token,
+            customer_id: "cust-amz-001",
+            action_type: "VIEW_ORDERS",
+            payload: {}
+          })
+        });
+        const result = await res.json();
+
+        if (result.decision === 'ALLOW') {
+          iconBadge.className = 'modal-icon verdict-allow';
+          iconBadge.textContent = '📜';
+          titleText.textContent = "Order History Verified (ALLOW)";
+          subtitleText.textContent = `Authorized via HistoryCheckerBot (${histAgent.agent_id})`;
+
+          const orders = (result.execution_result && result.execution_result.orders) || [];
+          if (orders.length === 0) {
+            bodyEl.innerHTML = `
+              <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Gatekeeper Verified: Scope 'orders:view' Authorized</div>
+              <p style="font-size:13px;">No past orders found in database yet. Try placing an order using <strong>RoutineShopperBot</strong> first!</p>
+              <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Audit ID: <code>${result.audit_id}</code></p>
+            `;
+          } else {
+            const ordersHtml = orders.slice(0, 5).map(o => `
+              <div style="background:white; border:1px solid #e2e8f0; border-radius:6px; padding:10px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; font-weight:700; font-size:13px;">
+                  <span>Order <code>${o.order_id}</code></span>
+                  <span style="color:var(--amz-red);">₹${o.total_amount.toLocaleString('en-IN')}</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Placed: ${o.placed_at ? o.placed_at.substring(0, 10) : 'Recent'} | Status: <strong>${o.status}</strong></div>
+                <div style="font-size:11px; color:#475569; margin-top:4px;">Items: ${(o.items || []).map(i => i.name).join(', ')}</div>
+              </div>
+            `).join('');
+
+            bodyEl.innerHTML = `
+              <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Gatekeeper Verified: Scope 'orders:view' Authorized</div>
+              <p style="font-size:12px; margin-bottom:10px;">Retrieved <strong>${orders.length}</strong> customer order(s) placed under customer <code>cust-amz-001</code>:</p>
+              <div style="max-height:220px; overflow-y:auto;">${ordersHtml}</div>
+              <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Audit ID: <code>${result.audit_id}</code></p>
+            `;
+          }
+
+          actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="closeModal()">Close</button>`;
+        } else {
+          iconBadge.className = 'modal-icon verdict-block';
+          iconBadge.textContent = '⛔';
+          titleText.textContent = "History Request Intercepted";
+          bodyEl.innerHTML = `<p style="color:red;">Decision: ${result.decision}. Reason: ${result.reason}</p>`;
+          actionsEl.innerHTML = `<button class="btn-checkout" onclick="closeModal()">Close</button>`;
+        }
+      } catch (err) {
+        iconBadge.textContent = '✕';
+        titleText.textContent = "Error";
+        bodyEl.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+        actionsEl.innerHTML = `<button class="btn-checkout" onclick="closeModal()">Close</button>`;
+      }
+    }
+
+    async function testReturnWithAgent() {
+      const modal = document.getElementById('decision-modal');
+      const iconBadge = document.getElementById('modal-icon-badge');
+      const titleText = document.getElementById('modal-title-text');
+      const subtitleText = document.getElementById('modal-subtitle');
+      const bodyEl = document.getElementById('modal-content-body');
+      const actionsEl = document.getElementById('modal-actions-container');
+
+      modal.style.display = 'flex';
+      iconBadge.className = 'modal-icon';
+      iconBadge.textContent = '🔄';
+      iconBadge.style.background = '#f3e8ff';
+      titleText.textContent = "Evaluating Return Request";
+      subtitleText.textContent = "ReturnsRefundBot (agent-return-005) evaluating return policy";
+
+      bodyEl.innerHTML = `
+        <div style="font-size:13px; margin-bottom:12px;">
+          Select a test scenario to evaluate via <strong>ReturnsRefundBot</strong>:
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="action-btn" style="background:#f8fafc; border:1px solid #cbd5e1; text-align:left;" onclick="executeReturnEvaluation(3, 'AMZ-FASH-01', 'Cotton Casual Shirt', 'Fashion', 899)">
+            🟢 <strong>Valid Return (Within 7-day window)</strong><br>
+            <span style="font-size:11px; color:var(--text-muted);">Shirt returned after 3 days &le; 7 days &rarr; Expected: <strong>ALLOW</strong></span>
+          </button>
+          <button class="action-btn" style="background:#f8fafc; border:1px solid #cbd5e1; text-align:left;" onclick="executeReturnEvaluation(14, 'AMZ-ELEC-01', 'Echo Dot Speaker', 'Electronics', 4499)">
+            🔴 <strong>Expired Return Window (> 7 days)</strong><br>
+            <span style="font-size:11px; color:var(--text-muted);">Echo Dot returned after 14 days &rarr; Expected: <strong>BLOCK (DOM-R02)</strong></span>
+          </button>
+          <button class="action-btn" style="background:#f8fafc; border:1px solid #cbd5e1; text-align:left;" onclick="executeReturnEvaluation(2, 'AMZ-GROC-01', 'Tata Tea Gold', 'Grocery', 520)">
+            🔴 <strong>Non-Returnable Category (Grocery)</strong><br>
+            <span style="font-size:11px; color:var(--text-muted);">Perishable grocery item &rarr; Expected: <strong>BLOCK (DOM-R03)</strong></span>
+          </button>
+        </div>
+      `;
+      actionsEl.innerHTML = `<button class="btn-checkout" style="background:#565959; border-color:#565959; color:white; width:auto; padding:8px 20px;" onclick="closeModal()">Cancel</button>`;
+    }
+
+    async function executeReturnEvaluation(days, itemId, itemName, category, amount) {
+      const modal = document.getElementById('decision-modal');
+      const iconBadge = document.getElementById('modal-icon-badge');
+      const titleText = document.getElementById('modal-title-text');
+      const subtitleText = document.getElementById('modal-subtitle');
+      const bodyEl = document.getElementById('modal-content-body');
+      const actionsEl = document.getElementById('modal-actions-container');
+
+      const returnAgent = specializedAgents["agent-return-005"];
+
+      try {
+        const res = await fetch('/api/v1/gatekeeper/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_id: returnAgent.agent_id,
+            api_token: returnAgent.token,
+            customer_id: "cust-amz-001",
+            action_type: "RETURN_REQUEST",
+            payload: {
+              order_id: "ord-past-01",
+              item_id: itemId,
+              name: itemName,
+              category: category,
+              refund_amount: amount,
+              days_since_delivery: days,
+              reason: "Customer requested return"
+            }
+          })
+        });
+        const result = await res.json();
+
+        if (result.decision === 'ALLOW') {
+          iconBadge.className = 'modal-icon verdict-allow';
+          iconBadge.textContent = '✓';
+          titleText.textContent = "Return Authorized (ALLOW)";
+          subtitleText.textContent = `Processed by: ${returnAgent.name}`;
+          bodyEl.innerHTML = `
+            <div style="color:var(--allow); font-weight:700; margin-bottom:8px;">✓ Return Request Approved</div>
+            <p><strong>Item:</strong> ${itemName} (${category})</p>
+            <p><strong>Refund Amount:</strong> ₹${amount.toLocaleString('en-IN')}</p>
+            <p><strong>Days Since Delivery:</strong> ${days} days (Policy: &le; 7 days)</p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Audit ID: <code>${result.audit_id}</code></p>
+          `;
+        } else {
+          iconBadge.className = 'modal-icon verdict-block';
+          iconBadge.textContent = '⛔';
+          titleText.textContent = "Return Blocked (BLOCK)";
+          subtitleText.textContent = `Policy Violation Enforced by Gatekeeper`;
+          bodyEl.innerHTML = `
+            <div style="background:var(--block-bg); border-left:4px solid var(--block); padding:10px; margin-bottom:12px; font-size:13px; color:var(--block);">
+              <strong>Rule Triggered (${result.triggered_rule}):</strong> ${result.reason}
+            </div>
+            <p style="font-size:13px;">
+              <strong>Item:</strong> ${itemName} (${category})<br>
+              <strong>Days Elapsed:</strong> ${days} days (Max allowed: 7 days)
+            </p>
+            <p style="margin-top:8px; font-size:11px; color:var(--text-muted);">Audit ID: <code>${result.audit_id}</code></p>
+          `;
+        }
+        actionsEl.innerHTML = `<button class="btn-checkout" style="width:auto; padding:8px 24px;" onclick="closeModal()">Close</button>`;
+      } catch (err) {
+        bodyEl.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
       }
     }
 
@@ -843,7 +1100,7 @@
     }
 
     // Init on page load
-    initAgent();
+    onAgentChanged();
     renderProducts();
   </script>
 </body>

@@ -169,7 +169,7 @@ class GatekeeperPipeline:
             elif req.action_type == "VIEW_ORDERS":
                 orders_res = StoreService.list_orders(
                     customer_id=req.customer_id,
-                    agent_id=req.agent_id,
+                    agent_id=None,
                     db_path=db_path
                 )
                 execution_result = {"orders": [o.model_dump() for o in orders_res]}
