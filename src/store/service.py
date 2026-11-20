@@ -53,6 +53,7 @@ SAMPLE_CATALOG = [
     CartItem(item_id="AMZ-JEWL-01", name="Candere by Kalyan Jewellers 22K Gold Pendant", category=ProductCategory.JEWELRY, unit_price_inr=18500.0, quantity=1),
     CartItem(item_id="AMZ-JEWL-02", name="Clara 925 Sterling Silver Solitaire Ring", category=ProductCategory.JEWELRY, unit_price_inr=1899.0, quantity=1),
     CartItem(item_id="AMZ-JEWL-03", name="Titan Karishma Analog Men's Watch", category=ProductCategory.JEWELRY, unit_price_inr=2195.0, quantity=1),
+    CartItem(item_id="AMZ-JEWL-04", name="Tanishq 22K Gold & Diamond Bridal Necklace Set", category=ProductCategory.JEWELRY, unit_price_inr=35000.0, quantity=1),
 
     # Books & Stationery
     CartItem(item_id="AMZ-BOOK-01", name="Atomic Habits by James Clear", category=ProductCategory.BOOKS, unit_price_inr=499.0, quantity=1),

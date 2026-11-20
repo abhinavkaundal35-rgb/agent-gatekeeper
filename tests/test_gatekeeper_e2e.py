@@ -106,7 +106,7 @@ def test_verdict_allow_routine_return(test_db, active_agent):
 
 def test_verdict_ask_customer_high_value_order(test_db, active_agent):
     """
-    Scenario: AI agent orders an Echo Dot smart speaker for ₹4,499 (> ₹2,000 threshold).
+    Scenario: AI agent orders Fire TV Stick 4K for ₹5,999 (> ₹5,000 threshold).
     Expected Decision: ASK CUSTOMER. Approval session token generated.
     """
     req = GatekeeperEvaluationRequest(
@@ -117,10 +117,10 @@ def test_verdict_ask_customer_high_value_order(test_db, active_agent):
         payload={
             "items": [
                 {
-                    "item_id": "AMZ-ELEC-01",
-                    "name": "Echo Dot (5th Gen) Smart Speaker",
+                    "item_id": "AMZ-ELEC-07",
+                    "name": "Fire TV Stick 4K with Alexa Voice Remote",
                     "category": "Electronics",
-                    "unit_price_inr": 4499.0,
+                    "unit_price_inr": 5999.0,
                     "quantity": 1
                 }
             ],
@@ -138,7 +138,7 @@ def test_verdict_ask_customer_high_value_order(test_db, active_agent):
     assert response.triggered_rule == "SEC-R07"
     assert response.approval_id is not None
     assert response.approval_id.startswith("app-amz-")
-    assert "₹2,000" in response.reason
+    assert "₹5,000" in response.reason
 
 def test_verdict_ask_customer_unverified_shipping_address(test_db, active_agent):
     """
@@ -176,7 +176,7 @@ def test_verdict_ask_customer_unverified_shipping_address(test_db, active_agent)
 
 def test_verdict_ask_customer_high_value_refund(test_db, active_agent):
     """
-    Scenario: Return request with refund amount ₹1,499 (> ₹1,000 threshold).
+    Scenario: Return request with refund amount ₹2,499 (> ₹2,000 threshold).
     Expected Decision: ASK CUSTOMER.
     """
     req = GatekeeperEvaluationRequest(
@@ -188,7 +188,7 @@ def test_verdict_ask_customer_high_value_refund(test_db, active_agent):
             "order_id": "ord-amz-demo1",
             "item_id": "AMZ-ELEC-02",
             "reason": "Battery life issues",
-            "refund_amount": 1499.0,
+            "refund_amount": 2499.0,
             "days_since_delivery": 3,
             "category": "Electronics"
         }
@@ -228,7 +228,7 @@ def test_verdict_block_revoked_agent(test_db, revoked_agent):
 
 def test_verdict_block_exceeded_hard_spending_cap(test_db, active_agent):
     """
-    Scenario: Agent attempts to purchase Kalyan Jewellers Gold Pendant for ₹18,500 (> ₹15,000 hard limit).
+    Scenario: Agent attempts to purchase Bridal Necklace Set for ₹35,000 (> ₹25,000 hard limit).
     Expected Decision: BLOCK (SEC-R03 takes priority over ask-customer).
     """
     req = GatekeeperEvaluationRequest(
@@ -239,10 +239,10 @@ def test_verdict_block_exceeded_hard_spending_cap(test_db, active_agent):
         payload={
             "items": [
                 {
-                    "item_id": "AMZ-JEWL-01",
-                    "name": "Candere by Kalyan Jewellers Gold Pendant",
+                    "item_id": "AMZ-JEWL-04",
+                    "name": "Tanishq 22K Gold & Diamond Bridal Necklace Set",
                     "category": "Jewelry",
-                    "unit_price_inr": 18500.0,
+                    "unit_price_inr": 35000.0,
                     "quantity": 1
                 }
             ],
@@ -258,7 +258,7 @@ def test_verdict_block_exceeded_hard_spending_cap(test_db, active_agent):
     response = GatekeeperPipeline.evaluate(req, db_path=test_db)
     assert response.decision == "BLOCK"
     assert response.triggered_rule == "SEC-R03"
-    assert "₹15,000" in response.reason
+    assert "₹25,000" in response.reason
 
 def test_verdict_block_expired_return_window(test_db, active_agent):
     """
@@ -330,10 +330,10 @@ def test_end_to_end_customer_approval_and_execution_flow(test_db, active_agent):
         payload={
             "items": [
                 {
-                    "item_id": "AMZ-ELEC-01",
-                    "name": "Echo Dot Smart Speaker",
+                    "item_id": "AMZ-ELEC-07",
+                    "name": "Fire TV Stick 4K",
                     "category": "Electronics",
-                    "unit_price_inr": 4499.0,
+                    "unit_price_inr": 5999.0,
                     "quantity": 1
                 }
             ],
@@ -370,4 +370,4 @@ def test_end_to_end_customer_approval_and_execution_flow(test_db, active_agent):
         db_path=test_db
     )
     assert order.status.value == "PLACED"
-    assert order.total_amount == 4499.0
+    assert order.total_amount == 5999.0

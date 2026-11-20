@@ -3,222 +3,422 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Gatekeeper | Amazon India Prototype</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Agent Gatekeeper | Enterprise AI Security & Governance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --amz-navy: #131921;
-      --amz-dark: #232f3e;
-      --amz-orange: #ff9900;
-      --amz-orange-dark: #e88b00;
+      --navy-900: #0b0f19;
+      --navy-800: #111827;
+      --navy-700: #1e293b;
+      --amz-amber: #f59e0b;
+      --amz-amber-dark: #d97706;
       --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
+      --surface: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #475569;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --allow: #16a34a;
-      --allow-bg: #dcfce7;
-      --ask: #ea580c;
-      --ask-bg: #ffedd5;
+      --border-subtle: #f1f5f9;
+      --allow: #059669;
+      --allow-bg: #ecfdf5;
+      --allow-border: #a7f3d0;
+      --ask: #d97706;
+      --ask-bg: #fffbeb;
+      --ask-border: #fde68a;
       --block: #dc2626;
-      --block-bg: #fee2e2;
+      --block-bg: #fef2f2;
+      --block-border: #fecaca;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding-bottom: 50px; -webkit-font-smoothing: antialiased; }
+
+    /* Executive Top Bar */
     header {
-      background-color: var(--amz-navy);
+      background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
       color: white;
-      padding: 16px 32px;
+      padding: 14px 32px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-    .brand span { background: var(--amz-orange); color: var(--amz-navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; }
-    .header-links a {
-      color: #94a3b8;
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+    }
+    .brand h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff; }
+    .brand .badge-tag {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-pill-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .pulse-dot-green {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      animation: pulseGlow 1.8s infinite;
+    }
+    @keyframes pulseGlow { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.4; transform: scale(0.9); } }
+
+    .header-links { display: flex; align-items: center; gap: 12px; }
+    .nav-link-btn {
+      color: #cbd5e1;
       text-decoration: none;
       font-size: 13px;
-      margin-left: 16px;
-      transition: color 0.2s;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
     }
-    .header-links a:hover { color: var(--amz-orange); }
-    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
-    
+    .nav-link-btn:hover { color: white; background: rgba(255,255,255,0.06); }
+    .btn-storefront-cta {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a !important;
+      font-weight: 700;
+      padding: 7px 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-storefront-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+    .container { max-width: 1260px; margin: 24px auto; padding: 0 20px; }
+
+    /* KPI Summary Stat Bar */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 4px; }
+    .kpi-subtext { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-badge {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+
+    /* Segmented Pill Navigation Tabs */
     .nav-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
+      background: #f1f5f9;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
       overflow-x: auto;
     }
     .tab-btn {
       padding: 10px 18px;
       border: none;
       background: none;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--text-sub);
       cursor: pointer;
       border-radius: 8px;
       white-space: nowrap;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
+    .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.6); }
     .tab-btn.active {
-      background-color: var(--card-bg);
-      color: var(--amz-dark);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: var(--surface);
+      color: var(--navy-900);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      font-weight: 700;
     }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 960px) { .grid-2 { grid-template-columns: 1fr; } }
 
+    /* Surface Card */
     .card {
-      background: var(--card-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow-sm);
       margin-bottom: 24px;
     }
-    .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.2px;
+    }
 
-    .scenario-btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    /* Interactive Scenarios */
+    .scenario-btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .scenario-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 14px 18px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       background: #ffffff;
       cursor: pointer;
       transition: all 0.2s;
       text-align: left;
     }
-    .scenario-btn:hover { border-color: var(--amz-orange); background: #fffcf8; }
-    .scenario-title { font-size: 14px; font-weight: 600; }
-    .scenario-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .scenario-btn:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .scenario-title { font-size: 13.5px; font-weight: 700; color: var(--text-main); }
+    .scenario-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
 
+    /* Badges */
     .badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       padding: 4px 10px;
-      border-radius: 12px;
+      border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .badge-allow { background: var(--allow-bg); color: var(--allow); border: 1px solid var(--allow-border); }
+    .badge-ask { background: var(--ask-bg); color: var(--ask); border: 1px solid var(--ask-border); }
+    .badge-block { background: var(--block-bg); color: var(--block); border: 1px solid var(--block-border); }
+
+    /* macOS Terminal Console */
+    .terminal-container {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .terminal-header {
+      background: #0f172a;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-left: 8px;
       letter-spacing: 0.5px;
     }
-    .badge-allow { background: var(--allow-bg); color: var(--allow); }
-    .badge-ask { background: var(--ask-bg); color: var(--ask); }
-    .badge-block { background: var(--block-bg); color: var(--block); }
-
     .console-output {
-      background: #0f172a;
+      background: transparent;
       color: #f1f5f9;
       padding: 16px;
-      border-radius: 8px;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      min-height: 260px;
-      max-height: 420px;
+      line-height: 1.5;
+      min-height: 280px;
+      max-height: 440px;
       overflow-y: auto;
       white-space: pre-wrap;
     }
 
-    .table-container { overflow-x: auto; margin-top: 12px; }
+    /* Table */
+    .table-container { overflow-x: auto; margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-    th { background: #f8fafc; padding: 12px; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-muted); }
-    td { padding: 12px; border-bottom: 1px solid var(--border); }
-    tr:hover { background: #fdfdfd; }
+    th {
+      background: #f8fafc;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f8fafc; }
 
     .action-btn {
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 8px 14px;
+      border-radius: 7px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      border: none;
-      transition: opacity 0.2s;
+      border: 1px solid transparent;
+      transition: all 0.2s;
     }
-    .btn-approve { background: var(--allow); color: white; margin-right: 6px; }
+    .btn-approve { background: var(--allow); color: white; }
+    .btn-approve:hover { filter: brightness(1.1); }
     .btn-reject { background: var(--block); color: white; }
-    .btn-primary { background: var(--amz-orange); color: var(--amz-navy); font-weight: 700; }
-    .btn-primary:hover { background: var(--amz-orange-dark); }
-    .action-btn:hover { opacity: 0.9; }
+    .btn-reject:hover { filter: brightness(1.1); }
+    .btn-primary { background: var(--navy-900); color: white; border: 1px solid var(--navy-700); }
+    .btn-primary:hover { background: var(--navy-700); }
 
     .banner {
-      background: #e0f2fe;
-      border-left: 4px solid #0284c7;
-      padding: 12px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #0369a1;
-      margin-bottom: 20px;
-    }
-
-    /* Client Storefront UI Elements */
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .product-card {
-      border: 1px solid var(--border);
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 14px 18px;
       border-radius: 8px;
-      padding: 16px;
-      background: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      font-size: 13px;
+      color: #1e40af;
+      margin-bottom: 20px;
+      line-height: 1.5;
     }
-    .product-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-    .product-price { font-size: 16px; font-weight: 700; color: #b12704; margin-bottom: 10px; }
-    .product-cat { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-
-    /* Mobile Notification Simulation */
-    .mobile-mockup {
-      background: #1e293b;
-      color: white;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-      border: 2px solid var(--amz-orange);
-      display: none;
-      animation: slideIn 0.3s ease-out;
-    }
-    @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 5px; }
     .form-group input, .form-group select {
       width: 100%;
-      padding: 8px 12px;
+      padding: 9px 12px;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 7px;
       font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
   </style>
 </head>
 <body>
 
+  <!-- Top Executive Header -->
   <header>
     <div class="brand">
-      <h1>Agent Gatekeeper</h1>
-      <span>Amazon India</span>
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <h1>Agent Gatekeeper</h1>
+        <div style="font-size:11px; color:#94a3b8; font-weight:500;">Amazon India Interception & Security Governance</div>
+      </div>
+      <span class="badge-tag">v1.1 Enterprise</span>
+      <div class="status-pill-live">
+        <span class="pulse-dot-green"></span>
+        <span>GATEKEEPER ACTIVE</span>
+      </div>
     </div>
     <div class="header-links">
-      <a href="/store" target="_blank" style="background:var(--amz-orange); color:#131921; font-weight:700; padding:6px 12px; border-radius:4px; text-decoration:none;">🛒 Open Client Storefront (/store)</a>
-      <a href="/docs" target="_blank">Interactive Swagger API (/docs)</a>
-      <a href="https://github.com/abhinavkaundal35-rgb/agent-gatekeeper" target="_blank">GitHub Repo</a>
+      <a href="/store" target="_blank" class="btn-storefront-cta">
+        <span>🛒</span>
+        <span>Client Storefront (/store) ↗</span>
+      </a>
+      <a href="/docs" target="_blank" class="nav-link-btn">Swagger API Docs ↗</a>
+      <a href="https://github.com/abhinavkaundal35-rgb/agent-gatekeeper" target="_blank" class="nav-link-btn">GitHub Repo ↗</a>
     </div>
   </header>
 
   <div class="container">
-    <div class="banner">
-      <strong>Ecosystem Architecture:</strong> This dashboard demonstrates both sides of the system:
-      <strong>1) Client Side</strong> (AI Shopping Agents & Amazon App Customers), and 
-      <strong>2) Gatekeeper Side</strong> (Security Evaluation, Triage & Immutable Audit).
+
+    <!-- KPI Summary Metric Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Auto-Approval Ceiling</div>
+          <div class="kpi-value" style="color:var(--allow);">₹5,000</div>
+          <div class="kpi-subtext">Automatic ALLOW Threshold</div>
+        </div>
+        <div class="kpi-badge" style="background:var(--allow-bg); color:var(--allow);">✓</div>
+      </div>
+
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Customer Escalation</div>
+          <div class="kpi-value" style="color:var(--ask);">₹5k – ₹25k</div>
+          <div class="kpi-subtext">Human-in-the-Loop Step-Up</div>
+        </div>
+        <div class="kpi-badge" style="background:var(--ask-bg); color:var(--ask);">⚠️</div>
+      </div>
+
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Hard Budget Ceiling</div>
+          <div class="kpi-value" style="color:var(--block);">₹25,000</div>
+          <div class="kpi-subtext">Strict Financial BLOCK Cap</div>
+        </div>
+        <div class="kpi-badge" style="background:var(--block-bg); color:var(--block);">⛔</div>
+      </div>
+
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Specialized Agents</div>
+          <div class="kpi-value" style="color:#2563eb;">5 Roles</div>
+          <div class="kpi-subtext">Least Privilege IAM Enforced</div>
+        </div>
+        <div class="kpi-badge" style="background:#eff6ff; color:#2563eb;">🤖</div>
+      </div>
     </div>
 
+    <!-- Navigation Tabs -->
     <div class="nav-tabs">
       <button class="tab-btn active" id="tab-btn-client" onclick="switchTab('client')">🛒 Client Storefront & AI Agent</button>
       <button class="tab-btn" id="tab-btn-agents" onclick="switchTab('agents')">🤖 Specialized Agents Registry</button>
@@ -333,16 +533,16 @@
           <div class="scenario-btn-group">
             <button class="scenario-btn" onclick="runScenario('allow_routine')">
               <div>
-                <div class="scenario-title">1. Routine Grocery Purchase (< ₹2,000)</div>
-                <div class="scenario-desc">Tata Tea & Atta for ₹1,015 to Bengaluru PIN 560001</div>
+                <div class="scenario-title">1. Routine Everyday Purchase (≤ ₹5,000)</div>
+                <div class="scenario-desc">Tata Tea & Atta for ₹1,015 to Bengaluru PIN 560001 (Auto-Approved)</div>
               </div>
               <span class="badge badge-allow">ALLOW</span>
             </button>
 
             <button class="scenario-btn" onclick="runScenario('ask_high_value')">
               <div>
-                <div class="scenario-title">2. High-Value Electronics (₹4,499)</div>
-                <div class="scenario-desc">Echo Dot Smart Speaker exceeds automatic ₹2,000 threshold</div>
+                <div class="scenario-title">2. High-Value Electronics (Fire TV Stick ₹5,999)</div>
+                <div class="scenario-desc">Fire TV Stick 4K (₹5,999) exceeds auto-approval ₹5,000 threshold</div>
               </div>
               <span class="badge badge-ask">ASK CUSTOMER</span>
             </button>
@@ -366,7 +566,7 @@
             <button class="scenario-btn" onclick="runScenario('block_hard_cap')">
               <div>
                 <div class="scenario-title">5. Hard Spending Cap Exceeded</div>
-                <div class="scenario-desc">Gold Pendant for ₹18,500 exceeds maximum cap of ₹15,000</div>
+                <div class="scenario-desc">Bridal Jewelry for ₹35,000 exceeds maximum cap of ₹25,000 (SEC-R02)</div>
               </div>
               <span class="badge badge-block">BLOCK</span>
             </button>
@@ -494,7 +694,9 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
       { id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", price: 520.0 },
       { id: "AMZ-ELEC-02", name: "boAt Rockerz 450", category: "Electronics", price: 1499.0 },
       { id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", price: 4499.0 },
-      { id: "AMZ-JEWL-01", name: "Kalyan Jewellers Pendant", category: "Jewelry", price: 18500.0 }
+      { id: "AMZ-ELEC-03", name: "Fire TV Stick 4K Max", category: "Electronics", price: 5999.0 },
+      { id: "AMZ-JEWL-01", name: "Kalyan Jewellers Pendant", category: "Jewelry", price: 18500.0 },
+      { id: "AMZ-JEWL-04", name: "Tanishq 22K Bridal Necklace", category: "Jewelry", price: 35000.0 }
     ];
 
     let selectedProduct = catalog[0];
@@ -655,7 +857,7 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
           customer_id: "cust-amz-001",
           action_type: "PURCHASE_ORDER",
           payload: {
-            items: [{ item_id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", unit_price_inr: 4499.0, quantity: 1 }],
+            items: [{ item_id: "AMZ-ELEC-03", name: "Fire TV Stick 4K Max", category: "Electronics", unit_price_inr: 5999.0, quantity: 1 }],
             shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
           }
         };
@@ -696,7 +898,7 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
           customer_id: "cust-amz-001",
           action_type: "PURCHASE_ORDER",
           payload: {
-            items: [{ item_id: "AMZ-JEWL-01", name: "Kalyan Jewellers Gold Pendant", category: "Jewelry", unit_price_inr: 18500.0, quantity: 1 }],
+            items: [{ item_id: "AMZ-JEWL-04", name: "Tanishq 22K Gold Bridal Necklace Set", category: "Jewelry", unit_price_inr: 35000.0, quantity: 1 }],
             shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
           }
         };
@@ -772,13 +974,13 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
           let testButtons = '';
 
           if (ag.agent_id === 'agent-allow-001') {
-            roleName = "🟢 Routine Shopping (< ₹2,000)";
+            roleName = "🟢 Routine Shopping (≤ ₹5,000)";
             expectedVerdict = '<span class="badge badge-allow">ALLOW</span>';
-            testButtons = `<button class="action-btn" style="background:#16a34a; color:white; width:100%;" onclick="testAgentAction('agent-allow-001', 'PURCHASE_ROUTINE')">Test Routine Buy (< ₹2k)</button>`;
+            testButtons = `<button class="action-btn" style="background:#16a34a; color:white; width:100%;" onclick="testAgentAction('agent-allow-001', 'PURCHASE_ROUTINE')">Test Routine Buy (≤ ₹5k)</button>`;
           } else if (ag.agent_id === 'agent-ask-002') {
-            roleName = "🟡 High-Value Buyer (> ₹2,000)";
+            roleName = "🟡 High-Value Buyer (> ₹5,000)";
             expectedVerdict = '<span class="badge badge-ask">ASK CUSTOMER</span>';
-            testButtons = `<button class="action-btn" style="background:#ea580c; color:white; width:100%;" onclick="testAgentAction('agent-ask-002', 'PURCHASE_HIGH_VALUE')">Test High-Value Buy (> ₹2k)</button>`;
+            testButtons = `<button class="action-btn" style="background:#ea580c; color:white; width:100%;" onclick="testAgentAction('agent-ask-002', 'PURCHASE_HIGH_VALUE')">Test High-Value Buy (> ₹5k)</button>`;
           } else if (ag.agent_id === 'agent-history-003') {
             roleName = "🔵 Order History Auditor";
             expectedVerdict = '<span class="badge badge-allow">ALLOW (View)</span><br><span class="badge badge-block" style="margin-top:2px;">BLOCK (Buy)</span>';
@@ -836,7 +1038,7 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
       } else if (testType === 'PURCHASE_HIGH_VALUE') {
         actionType = "PURCHASE_ORDER";
         payload = {
-          items: [{ item_id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen)", category: "Electronics", unit_price_inr: 4499.0, quantity: 1 }],
+          items: [{ item_id: "AMZ-ELEC-03", name: "Fire TV Stick 4K Max", category: "Electronics", unit_price_inr: 5999.0, quantity: 1 }],
           shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
         };
       } else if (testType === 'VIEW_ORDERS') {

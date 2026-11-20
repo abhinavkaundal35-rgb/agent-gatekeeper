@@ -13,8 +13,8 @@ def test_load_configurable_rules():
     """Test loading and validating the declarative rules configuration."""
     config = RuleLoader.load_rules()
     assert config.currency == "INR"
-    assert config.thresholds.auto_approval_max_inr == 2000.0
-    assert config.thresholds.transaction_hard_cap_inr == 15000.0
+    assert config.thresholds.auto_approval_max_inr == 5000.0
+    assert config.thresholds.transaction_hard_cap_inr == 25000.0
     assert len(config.rules) >= 8
 
 def test_priority_block_over_ask_customer():

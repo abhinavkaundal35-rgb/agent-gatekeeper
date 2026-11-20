@@ -1,14 +1,14 @@
 {
   "system": "Agent Gatekeeper Security Rules",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "reference_entity": "Amazon India",
   "currency": "INR",
   "thresholds": {
-    "auto_approval_max_inr": 2000.0,
-    "transaction_hard_cap_inr": 15000.0,
-    "daily_spend_hard_cap_inr": 25000.0,
+    "auto_approval_max_inr": 5000.0,
+    "transaction_hard_cap_inr": 25000.0,
+    "daily_spend_hard_cap_inr": 50000.0,
     "return_window_days": 7,
-    "refund_auto_approval_max_inr": 1000.0
+    "refund_auto_approval_max_inr": 2000.0
   },
   "restricted_categories": [
     "Jewelry",
@@ -28,7 +28,7 @@
       "condition": "agent.is_revoked == True",
       "verdict": "BLOCK",
       "priority": 10,
-      "message": "Access denied: Agent is revoked or decommissioned."
+      "message": "Access Denied [SEC-R01]: Agent credentials have been permanently REVOKED or DECOMMISSIONED by account administrator."
     },
     {
       "rule_id": "SEC-R02",
@@ -37,7 +37,7 @@
       "condition": "requested_scope not in agent.scopes",
       "verdict": "BLOCK",
       "priority": 20,
-      "message": "Access denied: Agent lacks permission scope for this action."
+      "message": "Access Denied [SEC-R02]: Agent lacks permission scope for this action. Restricted by Principle of Least Privilege."
     },
     {
       "rule_id": "SEC-R03",
@@ -46,7 +46,7 @@
       "condition": "transaction_amount > thresholds.transaction_hard_cap_inr",
       "verdict": "BLOCK",
       "priority": 30,
-      "message": "Transaction blocked: Order amount exceeds hard maximum threshold of ₹15,000."
+      "message": "Transaction Blocked [SEC-R03]: Order amount exceeds hard maximum budget ceiling of ₹25,000. High-risk AI purchase halted to prevent runaway financial liability."
     },
     {
       "rule_id": "SEC-R04",
@@ -55,7 +55,7 @@
       "condition": "daily_spend_cumulative > thresholds.daily_spend_hard_cap_inr",
       "verdict": "BLOCK",
       "priority": 35,
-      "message": "Transaction blocked: Cumulative 24-hour spend exceeds maximum limit of ₹25,000."
+      "message": "Transaction Blocked [SEC-R04]: Cumulative 24-hour spend exceeds maximum daily limit of ₹50,000. Spend velocity throttling enforced."
     },
     {
       "rule_id": "SEC-R05",
@@ -64,7 +64,7 @@
       "condition": "item.category in non_returnable_categories",
       "verdict": "BLOCK",
       "priority": 40,
-      "message": "Return blocked: Category is non-returnable under Amazon India policy."
+      "message": "Return Blocked [SEC-R05]: Item category is non-returnable (Perishable Grocery / Personal Hygiene) under Amazon India terms."
     },
     {
       "rule_id": "SEC-R06",
@@ -73,7 +73,7 @@
       "condition": "days_since_delivery > thresholds.return_window_days",
       "verdict": "BLOCK",
       "priority": 45,
-      "message": "Return blocked: Exceeded standard Amazon India 7-day return window."
+      "message": "Return Blocked [SEC-R06]: Request exceeds standard Amazon India 7-day return eligibility window."
     },
     {
       "rule_id": "SEC-R07",
@@ -82,7 +82,7 @@
       "condition": "transaction_amount > thresholds.auto_approval_max_inr",
       "verdict": "ASK CUSTOMER",
       "priority": 50,
-      "message": "Customer approval required: Order amount exceeds automatic threshold of ₹2,000."
+      "message": "Customer Approval Required [SEC-R07]: Order amount exceeds automatic allowance threshold of ₹5,000. Human verification requested."
     },
     {
       "rule_id": "SEC-R08",
@@ -91,7 +91,7 @@
       "condition": "shipping_pincode not in customer.verified_pincodes",
       "verdict": "ASK CUSTOMER",
       "priority": 55,
-      "message": "Customer approval required: Delivery PIN code is not in saved verified addresses."
+      "message": "Customer Approval Required [SEC-R08]: Delivery PIN code is not in customer's pre-verified address book."
     },
     {
       "rule_id": "SEC-R09",
@@ -100,7 +100,7 @@
       "condition": "item.category in restricted_categories",
       "verdict": "ASK CUSTOMER",
       "priority": 60,
-      "message": "Customer approval required: Cart contains high-risk or restricted product category."
+      "message": "Customer Approval Required [SEC-R09]: Cart contains high-risk or restricted goods (Jewelry / Luxury). Human confirmation required."
     },
     {
       "rule_id": "SEC-R10",
@@ -109,7 +109,7 @@
       "condition": "refund_amount > thresholds.refund_auto_approval_max_inr",
       "verdict": "ASK CUSTOMER",
       "priority": 65,
-      "message": "Customer approval required: Refund amount exceeds automatic threshold of ₹1,000."
+      "message": "Customer Approval Required [SEC-R10]: Refund amount exceeds automatic threshold of ₹2,000."
     }
   ]
 }

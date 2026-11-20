@@ -3,31 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amazon India | Online Shopping Store</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Amazon India | Enterprise AI Agent Storefront</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --amz-black: #131921;
-      --amz-dark: #232f3e;
-      --amz-yellow: #febd69;
-      --amz-orange: #f08804;
-      --amz-orange-dark: #e88b00;
-      --amz-blue: #007185;
-      --amz-red: #b12704;
-      --bg: #eaeded;
+      --amz-black: #0f172a;
+      --amz-dark: #1e293b;
+      --amz-yellow: #f59e0b;
+      --amz-orange: #f97316;
+      --amz-orange-dark: #ea580c;
+      --amz-blue: #0284c7;
+      --amz-red: #e11d48;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #0f1111;
-      --text-muted: #565959;
-      --border: #d5d9d9;
-      --allow: #067d62;
-      --allow-bg: #e6f4ea;
-      --ask: #b86200;
-      --ask-bg: #fff8e1;
-      --block: #ba0933;
-      --block-bg: #fdf2f2;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      --allow: #059669;
+      --allow-bg: #ecfdf5;
+      --ask: #d97706;
+      --ask-bg: #fffbeb;
+      --block: #e11d48;
+      --block-bg: #fff1f2;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; -webkit-font-smoothing: antialiased; }
+    code, pre { font-family: var(--font-mono); }
 
     /* Amazon Top Navigation Bar */
     .top-nav {
@@ -427,7 +433,7 @@
     <div class="gatekeeper-status-bar">
       <div>
         <span class="pulse-dot"></span>
-        <strong>Agent Gatekeeper Interceptor Active:</strong> All orders evaluated in real time (Policy: <span style="color:#86efac;">ALLOW &le; ₹2,000</span> | <span style="color:#fdba74;">ASK CUSTOMER &gt; ₹2,000</span> | <span style="color:#fca5a5;">BLOCK &gt; ₹15,000</span>).
+        <strong>Agent Gatekeeper Interceptor Active:</strong> Real-time security pipeline (Policy: <span style="color:#86efac; font-weight:700;">ALLOW &le; ₹5,000</span> | <span style="color:#fde047; font-weight:700;">ASK CUSTOMER ₹5,000–₹25,000</span> | <span style="color:#fca5a5; font-weight:700;">BLOCK &gt; ₹25,000</span>).
       </div>
       <div>
         <a href="/" target="_blank" style="color:var(--amz-yellow); font-size:13px; text-decoration:none; font-weight:600;">Security Governance Portal ↗</a>
@@ -440,7 +446,7 @@
       <div>
         <div class="catalog-header">
           <h1 style="font-size:20px; font-weight:700;" id="catalog-title">All Products</h1>
-          <span style="font-size:13px; color:var(--text-muted);" id="product-count-label">Showing 33 products</span>
+          <span style="font-size:13px; color:var(--text-muted);" id="product-count-label">Showing 34 products</span>
         </div>
         <div class="products-container" id="products-grid">
           <!-- Dynamically Populated via JS -->
@@ -482,9 +488,9 @@
               <option value="agent-return-005">🟣 ReturnsRefundBot (RETURNS: Returns & Refunds)</option>
             </select>
             <div id="agent-meta-badge" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; font-size:11px; margin-bottom:12px; line-height:1.4;">
-              <strong style="color:#0f172a;">Assigned Job:</strong> <span id="agent-role-desc">Routine grocery & household shopping under ₹2,000 (ALLOW)</span><br>
+              <strong style="color:#0f172a;">Assigned Job:</strong> <span id="agent-role-desc">Routine everyday shopping under ₹5,000 (ALLOW)</span><br>
               <span style="color:var(--text-muted);">Scopes: <code id="agent-scopes-desc">orders:buy, orders:view</code> | Status: <span id="agent-status-desc" style="color:#16a34a; font-weight:700;">ACTIVE</span></span>
-              <div id="agent-hint" style="color:#0284c7; font-size:10px; margin-top:4px; font-style:italic;">💡 Tip: Add any item under ₹2,000 and click 'Proceed to Buy' for automatic ALLOW.</div>
+              <div id="agent-hint" style="color:#0284c7; font-size:10px; margin-top:4px; font-style:italic;">💡 Tip: Add any item under ₹5,000 and click 'Proceed to Buy' for automatic ALLOW.</div>
             </div>
 
             <button id="btn-submit-order" class="btn-checkout" onclick="submitAgentOrder()" disabled>
@@ -526,54 +532,55 @@
   </div>
 
   <script>
-    // Amazon India Complete Catalog of 33 Products across 7 Categories
+    // Amazon India Complete Catalog of 34 Products across 7 Categories
     const products = [
       // Electronics
-      { id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen) Smart Speaker", category: "Electronics", price: 4499.0, rating: "★★★★★ (41,200)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-ELEC-02", name: "boAt Rockerz 450 Bluetooth Headphones", category: "Electronics", price: 1499.0, rating: "★★★★☆ (65,490)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-ELEC-03", name: "Kindle Paperwhite (16 GB) 6.8 Display", category: "Electronics", price: 13999.0, rating: "★★★★★ (18,300)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-ELEC-04", name: "OnePlus Nord Buds 2 TWS Earbuds", category: "Electronics", price: 2299.0, rating: "★★★★☆ (22,100)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-ELEC-05", name: "Mi 10000mAh Power Bank 3i (18W)", category: "Electronics", price: 1299.0, rating: "★★★★☆ (54,200)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-ELEC-06", name: "Logitech K380 Multi-Device Wireless Keyboard", category: "Electronics", price: 2995.0, rating: "★★★★☆ (14,600)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-ELEC-07", name: "Fire TV Stick 4K with Alexa Voice Remote", category: "Electronics", price: 5999.0, rating: "★★★★★ (78,400)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
+      { id: "AMZ-ELEC-01", name: "Echo Dot (5th Gen) Smart Speaker", category: "Electronics", price: 4499.0, rating: "★★★★★ (41,200)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-ELEC-02", name: "boAt Rockerz 450 Bluetooth Headphones", category: "Electronics", price: 1499.0, rating: "★★★★☆ (65,490)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-ELEC-03", name: "Kindle Paperwhite (16 GB) 6.8 Display", category: "Electronics", price: 13999.0, rating: "★★★★★ (18,300)", policy: "Exceeds ₹5,000 (Requires Customer Approval)" },
+      { id: "AMZ-ELEC-04", name: "OnePlus Nord Buds 2 TWS Earbuds", category: "Electronics", price: 2299.0, rating: "★★★★☆ (22,100)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-ELEC-05", name: "Mi 10000mAh Power Bank 3i (18W)", category: "Electronics", price: 1299.0, rating: "★★★★☆ (54,200)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-ELEC-06", name: "Logitech K380 Multi-Device Wireless Keyboard", category: "Electronics", price: 2995.0, rating: "★★★★☆ (14,600)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-ELEC-07", name: "Fire TV Stick 4K with Alexa Voice Remote", category: "Electronics", price: 5999.0, rating: "★★★★★ (78,400)", policy: "Exceeds ₹5,000 (Requires Customer Approval)" },
 
       // Grocery / Amazon Fresh
-      { id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", price: 520.0, rating: "★★★★☆ (12,481)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-02", name: "Aashirvaad Superior MP Atta 10kg", category: "Grocery", price: 495.0, rating: "★★★★★ (8,920)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-03", name: "Daawat Rozana Super Basmati Rice 5kg", category: "Grocery", price: 449.0, rating: "★★★★☆ (6,410)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-04", name: "Amul Pure Cow Ghee 1L Tin", category: "Grocery", price: 650.0, rating: "★★★★★ (21,500)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-05", name: "Borges Extra Virgin Olive Oil 1L", category: "Grocery", price: 1299.0, rating: "★★★★☆ (4,320)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-06", name: "Nutraj California Almonds 500g", category: "Grocery", price: 480.0, rating: "★★★★☆ (9,110)", policy: "Non-returnable (Perishable Grocery)" },
-      { id: "AMZ-GROC-07", name: "Nescafe Classic Instant Coffee 200g Jar", category: "Grocery", price: 410.0, rating: "★★★★★ (15,400)", policy: "Non-returnable (Perishable Grocery)" },
+      { id: "AMZ-GROC-01", name: "Tata Tea Gold 1kg", category: "Grocery", price: 520.0, rating: "★★★★☆ (12,481)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-02", name: "Aashirvaad Superior MP Atta 10kg", category: "Grocery", price: 495.0, rating: "★★★★★ (8,920)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-03", name: "Daawat Rozana Super Basmati Rice 5kg", category: "Grocery", price: 449.0, rating: "★★★★☆ (6,410)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-04", name: "Amul Pure Cow Ghee 1L Tin", category: "Grocery", price: 650.0, rating: "★★★★★ (21,500)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-05", name: "Borges Extra Virgin Olive Oil 1L", category: "Grocery", price: 1299.0, rating: "★★★★☆ (4,320)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-06", name: "Nutraj California Almonds 500g", category: "Grocery", price: 480.0, rating: "★★★★☆ (9,110)", policy: "Auto-Approved (Perishable Grocery)" },
+      { id: "AMZ-GROC-07", name: "Nescafe Classic Instant Coffee 200g Jar", category: "Grocery", price: 410.0, rating: "★★★★★ (15,400)", policy: "Auto-Approved (Perishable Grocery)" },
 
       // Fashion & Apparel
-      { id: "AMZ-FASH-01", name: "Cotton Casual Regular Fit Shirt for Men", category: "Fashion", price: 899.0, rating: "★★★★☆ (3,120)", policy: "7 Days Return / Exchange eligible" },
-      { id: "AMZ-FASH-02", name: "Levi's Men's 511 Slim Fit Jeans", category: "Fashion", price: 2499.0, rating: "★★★★★ (5,890)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-FASH-03", name: "Sparx Men's Walking & Running Shoes", category: "Fashion", price: 999.0, rating: "★★★★☆ (34,100)", policy: "7 Days Replacement guarantee" },
-      { id: "AMZ-FASH-04", name: "Biba Women's Cotton Straight Kurta", category: "Fashion", price: 1199.0, rating: "★★★★☆ (4,230)", policy: "7 Days Return / Exchange eligible" },
-      { id: "AMZ-FASH-05", name: "Fastrack Aviator Unisex Sunglasses", category: "Fashion", price: 1599.0, rating: "★★★★☆ (8,940)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-FASH-06", name: "WildHorn Genuine Leather Men's Wallet", category: "Fashion", price: 599.0, rating: "★★★★☆ (18,450)", policy: "Auto-Approved (< ₹2,000 threshold)" },
+      { id: "AMZ-FASH-01", name: "Cotton Casual Regular Fit Shirt for Men", category: "Fashion", price: 899.0, rating: "★★★★☆ (3,120)", policy: "Auto-Approved (7 Days Return eligible)" },
+      { id: "AMZ-FASH-02", name: "Levi's Men's 511 Slim Fit Jeans", category: "Fashion", price: 2499.0, rating: "★★★★★ (5,890)", policy: "Auto-Approved (7 Days Return eligible)" },
+      { id: "AMZ-FASH-03", name: "Sparx Men's Walking & Running Shoes", category: "Fashion", price: 999.0, rating: "★★★★☆ (34,100)", policy: "Auto-Approved (7 Days Replacement)" },
+      { id: "AMZ-FASH-04", name: "Biba Women's Cotton Straight Kurta", category: "Fashion", price: 1199.0, rating: "★★★★☆ (4,230)", policy: "Auto-Approved (7 Days Return eligible)" },
+      { id: "AMZ-FASH-05", name: "Fastrack Aviator Unisex Sunglasses", category: "Fashion", price: 1599.0, rating: "★★★★☆ (8,940)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-FASH-06", name: "WildHorn Genuine Leather Men's Wallet", category: "Fashion", price: 599.0, rating: "★★★★☆ (18,450)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
 
       // Home & Kitchen
-      { id: "AMZ-HOME-01", name: "Prestige Iris 750 Watt Mixer Grinder", category: "Home", price: 3199.0, rating: "★★★★☆ (19,840)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
-      { id: "AMZ-HOME-02", name: "Milton Thermosteel 1000ml Flask", category: "Home", price: 899.0, rating: "★★★★★ (28,300)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-HOME-03", name: "Hawkins Contura 3L Pressure Cooker", category: "Home", price: 1650.0, rating: "★★★★★ (31,900)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-HOME-04", name: "Solimo 100% Cotton Double Bedsheet", category: "Home", price: 799.0, rating: "★★★★☆ (11,400)", policy: "7 Days Return / Exchange eligible" },
-      { id: "AMZ-HOME-05", name: "Philips Digital Air Fryer (4.1 L)", category: "Home", price: 7999.0, rating: "★★★★★ (9,800)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
+      { id: "AMZ-HOME-01", name: "Prestige Iris 750 Watt Mixer Grinder", category: "Home", price: 3199.0, rating: "★★★★☆ (19,840)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-HOME-02", name: "Milton Thermosteel 1000ml Flask", category: "Home", price: 899.0, rating: "★★★★★ (28,300)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-HOME-03", name: "Hawkins Contura 3L Pressure Cooker", category: "Home", price: 1650.0, rating: "★★★★★ (31,900)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-HOME-04", name: "Solimo 100% Cotton Double Bedsheet", category: "Home", price: 799.0, rating: "★★★★☆ (11,400)", policy: "Auto-Approved (7 Days Return eligible)" },
+      { id: "AMZ-HOME-05", name: "Philips Digital Air Fryer (4.1 L)", category: "Home", price: 7999.0, rating: "★★★★★ (9,800)", policy: "Exceeds ₹5,000 (Requires Customer Approval)" },
 
       // Jewelry & Luxury
-      { id: "AMZ-JEWL-01", name: "Candere by Kalyan Jewellers 22K Gold Pendant", category: "Jewelry", price: 18500.0, rating: "★★★★★ (840)", policy: "Exceeds ₹15,000 Hard Limit (Blocked)" },
-      { id: "AMZ-JEWL-02", name: "Clara 925 Sterling Silver Solitaire Ring", category: "Jewelry", price: 1899.0, rating: "★★★★☆ (2,100)", policy: "High-Risk Category (Restricted Check)" },
-      { id: "AMZ-JEWL-03", name: "Titan Karishma Analog Men's Watch", category: "Jewelry", price: 2195.0, rating: "★★★★★ (14,200)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" },
+      { id: "AMZ-JEWL-01", name: "Candere by Kalyan Jewellers 22K Gold Pendant", category: "Jewelry", price: 18500.0, rating: "★★★★★ (840)", policy: "High-Value Luxury (Requires Customer Approval)" },
+      { id: "AMZ-JEWL-02", name: "Clara 925 Sterling Silver Solitaire Ring", category: "Jewelry", price: 1899.0, rating: "★★★★☆ (2,100)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-JEWL-03", name: "Titan Karishma Analog Men's Watch", category: "Jewelry", price: 2195.0, rating: "★★★★★ (14,200)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-JEWL-04", name: "Tanishq 22K Gold & Diamond Bridal Necklace Set", category: "Jewelry", price: 35000.0, rating: "★★★★★ (420)", policy: "Exceeds ₹25,000 Hard Limit (Blocked: SEC-R02)" },
 
       // Books & Stationery
-      { id: "AMZ-BOOK-01", name: "Atomic Habits by James Clear", category: "Books", price: 499.0, rating: "★★★★★ (102,400)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-BOOK-02", name: "Fluent Python Programming Guide", category: "Books", price: 1850.0, rating: "★★★★★ (3,400)", policy: "Auto-Approved (< ₹2,000 threshold)" },
-      { id: "AMZ-BOOK-03", name: "Classmate Spiral Notebook (Pack of 6)", category: "Books", price: 420.0, rating: "★★★★☆ (8,900)", policy: "Auto-Approved (< ₹2,000 threshold)" },
+      { id: "AMZ-BOOK-01", name: "Atomic Habits by James Clear", category: "Books", price: 499.0, rating: "★★★★★ (102,400)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-BOOK-02", name: "Fluent Python Programming Guide", category: "Books", price: 1850.0, rating: "★★★★★ (3,400)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
+      { id: "AMZ-BOOK-03", name: "Classmate Spiral Notebook (Pack of 6)", category: "Books", price: 420.0, rating: "★★★★☆ (8,900)", policy: "Auto-Approved (≤ ₹5,000 threshold)" },
 
       // Beauty & Personal Care
-      { id: "AMZ-BEAU-01", name: "Cetaphil Gentle Skin Cleanser (250ml)", category: "Beauty", price: 545.0, rating: "★★★★★ (38,900)", policy: "Non-returnable (Personal Hygiene)" },
-      { id: "AMZ-BEAU-02", name: "Oral-B Pro 3 Electric Rechargeable Toothbrush", category: "Beauty", price: 3499.0, rating: "★★★★☆ (5,200)", policy: "Exceeds ₹2,000 (Requires Customer Approval)" }
+      { id: "AMZ-BEAU-01", name: "Cetaphil Gentle Skin Cleanser (250ml)", category: "Beauty", price: 545.0, rating: "★★★★★ (38,900)", policy: "Auto-Approved (Personal Hygiene)" },
+      { id: "AMZ-BEAU-02", name: "Oral-B Pro 3 Electric Rechargeable Toothbrush", category: "Beauty", price: 3499.0, rating: "★★★★☆ (5,200)", policy: "Auto-Approved (≤ ₹5,000 threshold)" }
     ];
 
     let cart = [];
@@ -585,22 +592,22 @@
       "agent-allow-001": {
         agent_id: "agent-allow-001",
         name: "RoutineShopperBot",
-        role: "Routine grocery & household shopping under ₹2,000 auto-limit (ALLOW Agent)",
+        role: "Routine everyday shopping under ₹5,000 auto-limit (ALLOW Agent)",
         scopes: ["orders:buy", "orders:view"],
         status: "ACTIVE",
         token: "amz_gatekeeper_token_allow_001",
         statusColor: "#16a34a",
-        hint: "💡 Tip: Add any item under ₹2,000 (e.g. Tata Tea ₹520, boAt Headphones ₹1,499) and click 'Proceed to Buy' for automatic ALLOW."
+        hint: "💡 Tip: Add any item under ₹5,000 (e.g. Echo Dot ₹4,499, boAt Headphones ₹1,499) and click 'Proceed to Buy' for automatic ALLOW."
       },
       "agent-ask-002": {
         agent_id: "agent-ask-002",
         name: "HighValueBuyerBot",
-        role: "High-value purchase agent. Orders > ₹2,000 trigger Customer Approval Challenge (ASK CUSTOMER Agent)",
+        role: "High-value purchase agent. Orders > ₹5,000 trigger Customer Approval Challenge (ASK CUSTOMER Agent)",
         scopes: ["orders:buy", "orders:view"],
         status: "ACTIVE",
         token: "amz_gatekeeper_token_ask_002",
         statusColor: "#d97706",
-        hint: "💡 Tip: Add an item > ₹2,000 (e.g. Echo Dot ₹4,499) and click 'Proceed to Buy' to trigger Human-in-the-Loop authorization!"
+        hint: "💡 Tip: Add an item > ₹5,000 (e.g. Fire TV Stick ₹5,999 or Kindle ₹13,999) and click 'Proceed to Buy' to trigger Human-in-the-Loop authorization!"
       },
       "agent-history-003": {
         agent_id: "agent-history-003",
