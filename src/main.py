@@ -45,20 +45,25 @@ app.include_router(approvals_router)
 app.include_router(audit_router)
 
 @app.get("/", response_class=HTMLResponse, tags=["Web UI"])
+@app.get("/api/index.py", response_class=HTMLResponse, include_in_schema=False)
 def web_dashboard():
     """Serves the interactive Agent Gatekeeper Security & Governance Portal."""
-    if UI_HTML_PATH.exists():
-        with open(UI_HTML_PATH, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    for p in [UI_HTML_PATH, Path("src/ui/dashboard.html"), Path("/var/task/src/ui/dashboard.html")]:
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
     return HTMLResponse("<h2>Dashboard HTML not found.</h2>")
 
 @app.get("/store", response_class=HTMLResponse, tags=["Client Storefront"])
 @app.get("/shop", response_class=HTMLResponse, tags=["Client Storefront"])
+@app.get("/api/index.py/store", response_class=HTMLResponse, include_in_schema=False)
+@app.get("/api/index.py/shop", response_class=HTMLResponse, include_in_schema=False)
 def client_storefront():
     """Serves the dedicated Amazon India Client Storefront for live customer shopping & AI checkout."""
-    if STORE_HTML_PATH.exists():
-        with open(STORE_HTML_PATH, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    for p in [STORE_HTML_PATH, Path("src/ui/client_storefront.html"), Path("/var/task/src/ui/client_storefront.html")]:
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
     return HTMLResponse("<h2>Storefront HTML not found.</h2>")
 
 @app.get("/api", tags=["System"])
