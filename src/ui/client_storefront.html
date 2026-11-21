@@ -520,6 +520,7 @@
                     <option value="agent-history-003">🔵 Force: HistoryCheckerBot (Test Illegal Buy Attempt → SEC-R02 BLOCK)</option>
                     <option value="agent-block-004">🔴 Force: DecommissionedBot (Test Revoked Credential → SEC-R01 BLOCK)</option>
                     <option value="agent-return-005">🟣 Force: ReturnsRefundBot (Test Return Scope)</option>
+                    <option value="agent-luxury-006">💎 Force: LuxuryJewelryBot (RESTRICTED CATEGORY: SEC-R09)</option>
                   </select>
                   <span style="font-size:10px; color:#94a3b8; display:block; line-height:1.3;">
                     Allows testing security violations (e.g. revoked agent or history bot trying to purchase). Leave on <strong>Autonomous Dispatcher</strong> for normal auto-detection.
@@ -536,6 +537,9 @@
             </button>
             <button class="action-btn" style="width:100%; margin-top:6px; background:#fdf4ff; color:#7e22ce; border:1px solid #e9d5ff; font-weight:600;" onclick="testReturnWithAgent()">
               🔄 Test Return Request (via Returns Agent)
+            </button>
+            <button class="action-btn" style="width:100%; margin-top:6px; background:#eff6ff; color:#0369a1; border:1px solid #bae6fd; font-weight:600;" onclick="testLuxuryWithAgent()">
+              💎 Test Luxury Purchase (via Luxury Agent - SEC-R09)
             </button>
           </div>
         </div>
@@ -672,6 +676,15 @@
         token: "amz_gatekeeper_token_return_005",
         statusColor: "#9333ea",
         hint: "🔄 Returns Specialist: Click 'Test Return Request' to evaluate return window (&le; 7 days) and non-returnable categories."
+      },
+      "agent-luxury-006": {
+        agent_id: "agent-luxury-006",
+        name: "LuxuryJewelryBot",
+        role: "Restricted goods & luxury buyer (Jewelry, Gold, Luxury). Governed by Step-Up Challenge (Rule SEC-R09)",
+        scopes: ["orders:buy", "orders:view"],
+        token: "amz_gatekeeper_token_luxury_006",
+        statusColor: "#0284c7",
+        hint: "💎 Restricted Goods Specialist: Any purchase containing Jewelry or Gold items triggers Customer Step-Up Challenge (SEC-R09)."
       }
     };
 
@@ -695,6 +708,16 @@
           verdictBadge: '<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #b45309; font-size:11px;">ASK CUSTOMER</span>',
           borderColor: "#d97706",
           reason: `⚠️ <strong>Address Anomaly Detected:</strong> Delivery PIN <code>400001</code> differs from verified Bengaluru address (560001). System will challenge account holder with a Step-Up Approval Challenge.`
+        };
+      } else if (cart.some(it => it.category === "Jewelry")) {
+        return {
+          agentKey: "agent-luxury-006",
+          avatar: "💎",
+          name: "LuxuryJewelryBot",
+          agentId: "agent-luxury-006",
+          verdictBadge: '<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #b45309; font-size:11px;">ASK CUSTOMER (SEC-R09)</span>',
+          borderColor: "#0284c7",
+          reason: `💎 <strong>Restricted Goods Detected (Jewelry):</strong> Cart contains high-risk luxury items. System automatically assigned <strong>LuxuryJewelryBot</strong> to enforce Step-Up Customer Verification under <strong>Rule SEC-R09</strong>.`
         };
       } else if (total > 5000) {
         return {
@@ -1143,6 +1166,15 @@
         </div>
       `;
       actionsEl.innerHTML = `<button class="btn-checkout" style="background:#565959; border-color:#565959; color:white; width:auto; padding:8px 20px;" onclick="closeModal()">Cancel</button>`;
+    }
+
+    function testLuxuryWithAgent() {
+      const luxuryItem = products.find(p => p.id === "AMZ-JEWL-02");
+      if (luxuryItem) {
+        cart = [{ ...luxuryItem, cartId: Date.now() }];
+        updateCartUI();
+        submitAgentOrder();
+      }
     }
 
     async function executeReturnEvaluation(days, itemId, itemName, category, amount) {

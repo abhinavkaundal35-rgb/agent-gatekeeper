@@ -185,6 +185,16 @@ def init_db(db_path: Optional[str] = None) -> None:
             json.dumps(["returns:create", "returns:view", "orders:view"]),
             now_iso,
             None
+        ),
+        (
+            "agent-luxury-006",
+            "cust-amz-001",
+            "LuxuryJewelryBot (RESTRICTED CATEGORY Agent)",
+            "ACTIVE",
+            "amz_gatekeeper_token_luxury_006",
+            json.dumps(["orders:buy", "orders:view"]),
+            now_iso,
+            None
         )
     ]
 

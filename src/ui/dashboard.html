@@ -451,11 +451,12 @@
         <strong>Academic Requirement: Distinct AI Agents for Specific Work:</strong><br>
         To uphold the Principle of Least Privilege, each customer AI agent is assigned a dedicated responsibility with unique cryptographic tokens and scoped permissions:
         <ul style="margin:6px 0 0 20px; font-size:12px; line-height:1.5;">
-          <li><strong style="color:#16a34a;">ALLOW Agent</strong> (<code>agent-allow-001</code>): Routine shopping under ₹2,000 threshold (Auto-Approved).</li>
-          <li><strong style="color:#d97706;">ASK CUSTOMER Agent</strong> (<code>agent-ask-002</code>): High-value shopping over ₹2,000 (Requires Customer Challenge Approval).</li>
+          <li><strong style="color:#16a34a;">ALLOW Agent</strong> (<code>agent-allow-001</code>): Routine shopping under ₹5,000 threshold (Auto-Approved).</li>
+          <li><strong style="color:#d97706;">ASK CUSTOMER Agent</strong> (<code>agent-ask-002</code>): High-value shopping over ₹5,000 (Requires Customer Challenge Approval).</li>
           <li><strong style="color:#2563eb;">HISTORY CHECK Agent</strong> (<code>agent-history-003</code>): Read-only past orders auditor (Scope: <code>orders:view</code>). Buying attempts are <strong>BLOCKED</strong>!</li>
           <li><strong style="color:#dc2626;">BLOCK Agent</strong> (<code>agent-block-004</code>): Revoked/decommissioned bot. Any request is immediately <strong>BLOCKED</strong> by Rule SEC-R01.</li>
           <li><strong style="color:#9333ea;">RETURNS Agent</strong> (<code>agent-return-005</code>): Dedicated return filing specialist (Scopes: <code>returns:create, returns:view, orders:view</code>).</li>
+          <li><strong style="color:#0284c7;">RESTRICTED CATEGORY Agent</strong> (<code>agent-luxury-006</code>): High-risk goods specialist (Jewelry / Gold). Mandatory customer authorization challenge (Rule SEC-R09).</li>
         </ul>
       </div>
 
@@ -577,6 +578,14 @@
                 <div class="scenario-desc">Return requested 14 days after delivery (Policy: 7 days)</div>
               </div>
               <span class="badge badge-block">BLOCK</span>
+            </button>
+
+            <button class="scenario-btn" onclick="runScenario('ask_luxury')">
+              <div>
+                <div class="scenario-title">7. Restricted Goods: Luxury & Jewelry (Silver Ring ₹1,899)</div>
+                <div class="scenario-desc">Jewelry under ₹5,000 threshold still triggers Step-Up Challenge (SEC-R09)</div>
+              </div>
+              <span class="badge badge-ask">ASK CUSTOMER</span>
             </button>
           </div>
         </div>
@@ -917,6 +926,17 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
             category: "Electronics"
           }
         };
+      } else if (type === 'ask_luxury') {
+        payloadReq = {
+          agent_id: "agent-luxury-006",
+          api_token: "amz_gatekeeper_token_luxury_006",
+          customer_id: "cust-amz-001",
+          action_type: "PURCHASE_ORDER",
+          payload: {
+            items: [{ item_id: "AMZ-JEWL-02", name: "Clara 925 Sterling Silver Solitaire Ring", category: "Jewelry", unit_price_inr: 1899.0, quantity: 1 }],
+            shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
+          }
+        };
       }
 
       try {
@@ -954,7 +974,8 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
       "agent-ask-002": "amz_gatekeeper_token_ask_002",
       "agent-history-003": "amz_gatekeeper_token_history_003",
       "agent-block-004": "amz_gatekeeper_token_block_004",
-      "agent-return-005": "amz_gatekeeper_token_return_005"
+      "agent-return-005": "amz_gatekeeper_token_return_005",
+      "agent-luxury-006": "amz_gatekeeper_token_luxury_006"
     };
 
     async function loadAgentsRegistry() {
@@ -996,6 +1017,10 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
             roleName = "🟣 Returns & Refunds";
             expectedVerdict = '<span class="badge badge-allow">ALLOW (&le;7d)</span>';
             testButtons = `<button class="action-btn" style="background:#9333ea; color:white; width:100%;" onclick="testAgentAction('agent-return-005', 'RETURN_REQUEST')">Test Return Request</button>`;
+          } else if (ag.agent_id === 'agent-luxury-006') {
+            roleName = "💎 Luxury & Restricted Goods Buyer";
+            expectedVerdict = '<span class="badge badge-ask">ASK (SEC-R09)</span>';
+            testButtons = `<button class="action-btn" style="background:#0284c7; color:white; width:100%;" onclick="testAgentAction('agent-luxury-006', 'PURCHASE_LUXURY')">Test Luxury Buy (SEC-R09)</button>`;
           } else {
             roleName = "Dynamic AI Agent";
             expectedVerdict = '<span class="badge badge-allow">ALLOW (Scopes)</span>';
@@ -1053,6 +1078,12 @@ curl -X POST "http://127.0.0.1:8000/api/v1/gatekeeper/evaluate" \
           refund_amount: 899.0,
           days_since_delivery: 3,
           category: "Fashion"
+        };
+      } else if (testType === 'PURCHASE_LUXURY') {
+        actionType = "PURCHASE_ORDER";
+        payload = {
+          items: [{ item_id: "AMZ-JEWL-02", name: "Clara 925 Sterling Silver Solitaire Ring", category: "Jewelry", unit_price_inr: 1899.0, quantity: 1 }],
+          shipping_address: { address_line: "Flat 402, Green Palms", city: "Bengaluru", state: "Karnataka", pincode: "560001" }
         };
       }
 

@@ -199,6 +199,42 @@ def test_verdict_ask_customer_high_value_refund(test_db, active_agent):
     assert response.triggered_rule == "SEC-R10"
     assert response.approval_id is not None
 
+def test_verdict_ask_customer_restricted_category_luxury_order(test_db):
+    """
+    Scenario: agent-luxury-006 orders a Clara Silver Solitaire Ring for ₹1,899 (category: Jewelry).
+    Even though ₹1,899 <= ₹5,000 allowance, the restricted category triggers Rule SEC-R09.
+    Expected Decision: ASK CUSTOMER.
+    """
+    req = GatekeeperEvaluationRequest(
+        agent_id="agent-luxury-006",
+        api_token="amz_gatekeeper_token_luxury_006",
+        customer_id="cust-amz-001",
+        action_type="PURCHASE_ORDER",
+        payload={
+            "items": [
+                {
+                    "item_id": "AMZ-JEWL-02",
+                    "name": "Clara 925 Sterling Silver Solitaire Ring",
+                    "category": "Jewelry",
+                    "unit_price_inr": 1899.0,
+                    "quantity": 1
+                }
+            ],
+            "shipping_address": {
+                "address_line": "Flat 402, Green Palms, MG Road",
+                "city": "Bengaluru",
+                "state": "Karnataka",
+                "pincode": "560001"
+            }
+        }
+    )
+
+    response = GatekeeperPipeline.evaluate(req, db_path=test_db)
+    assert response.decision == "ASK CUSTOMER"
+    assert response.triggered_rule == "SEC-R09"
+    assert response.approval_id is not None
+    assert "restricted" in response.reason.lower() or "jewelry" in response.reason.lower()
+
 # ==========================================
 # 3. BLOCK SCENARIOS
 # ==========================================
